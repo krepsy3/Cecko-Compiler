@@ -1,0 +1,28 @@
+/*
+
+cecko3.cpp
+
+main program
+
+*/
+
+#include "ckmain.hpp"
+
+#include "caparser.hpp"
+
+int main(int argc, char **argv)
+{
+	cecko::main_state_code ms;
+
+	auto rv1 = ms.setup(argc, argv);
+	if (!rv1)
+		return -1;
+
+	auto rv2 = ms.parse< cecko::parser>();
+	if (!rv2)
+		return -1;
+
+	std::cout << "========== cecko3 done ==========" << std::endl;
+
+	return 0;
+}
