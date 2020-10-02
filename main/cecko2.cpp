@@ -12,8 +12,6 @@ main program
 
 int main(int argc, char **argv)
 {
-	system("pwd");
-
 	cecko::main_state_code ms;
 
 	auto rv1 = ms.setup(argc, argv);
