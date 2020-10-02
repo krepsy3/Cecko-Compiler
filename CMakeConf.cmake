@@ -22,6 +22,9 @@ else()
 	llvm_map_components_to_libnames(LLVM_LIBS_USED support core mcjit x86codegen)
 endif()
 
+set(THREADS_PREFER_PTHREAD_FLAG True)
+find_package(Threads REQUIRED)
+
 function(SET_TARGET_OPTIONS TARGET OPT_GCC OPT_MSVC)
 	if(MSVC)
 		target_compile_options(${TARGET} PUBLIC ${OPT_MSVC})
@@ -55,6 +58,8 @@ function(CREATE_TARGET TARGET)
 	else()
 		target_link_libraries(${TARGET} PUBLIC ${LLVM_LIBS_USED})
 	endif()	
+
+	target_link_libraries(${TARGET} PRIVATE Threads::Threads)
 endfunction()
 
 function(MAKE_TARGET TARGET_MACRO_SUFFIX TARGET)

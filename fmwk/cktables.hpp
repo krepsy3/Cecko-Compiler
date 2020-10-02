@@ -713,7 +713,7 @@ namespace cecko {
 				if (!!arg_pack.name)	// unnamed arguments are not accessible inside the function
 				{
 					auto arg_type = f_type->get_function_arg_type(ix);
-					auto arg_ir = f_ir->getArg(ix);
+					auto arg_ir = f_ir->args().begin() + ix;
 					auto var = builder.CreateAlloca(arg_type->get_ir(), nullptr, *arg_pack.name);
 					builder.CreateStore(arg_ir, var);
 					vars_.try_emplace(*arg_pack.name, CKTypeRefPack{ arg_type, arg_pack.is_const }, var, true);
