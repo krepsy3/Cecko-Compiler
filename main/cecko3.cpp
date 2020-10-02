@@ -22,6 +22,10 @@ int main(int argc, char **argv)
 	if (!rv2)
 		return -1;
 
+	auto rv3 = ms.dump_tables();
+	if (!rv3)
+		return -1;
+
 	std::cout << "========== cecko3 done ==========" << std::endl;
 
 	return 0;

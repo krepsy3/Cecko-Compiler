@@ -1,6 +1,6 @@
 /*
 
-cecko4.cpp
+cecko5.cpp
 
 main program
 
@@ -34,7 +34,7 @@ int main(int argc, char **argv)
 	if (!rv5)
 		return -1;
 
-	std::cout << "========== cecko4 done ==========" << std::endl;
+	std::cout << "========== cecko5 done ==========" << std::endl;
 
 	return 0;
 }

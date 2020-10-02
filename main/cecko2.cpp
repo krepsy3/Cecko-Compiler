@@ -1,6 +1,6 @@
 /*
 
-cecko.cpp
+cecko2.cpp
 
 main program
 
@@ -12,6 +12,8 @@ main program
 
 int main(int argc, char **argv)
 {
+	system("pwd");
+
 	cecko::main_state_code ms;
 
 	auto rv1 = ms.setup(argc, argv);
@@ -22,19 +24,7 @@ int main(int argc, char **argv)
 	if (!rv2)
 		return -1;
 
-	auto rv3 = ms.dump_tables();
-	if (!rv3)
-		return -1;
-
-	auto rv4 = ms.dump_code();
-	if (!rv4)
-		return -1;
-
-	auto rv5 = ms.run_code();
-	if (!rv5)
-		return -1;
-
-	std::cout << "========== cecko6 done ==========" << std::endl;
+	std::cout << "========== cecko2 done ==========" << std::endl;
 
 	return 0;
 }

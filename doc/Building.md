@@ -13,11 +13,11 @@ The `-DLLVM_DIR` option is usually not required if LLVM was installed as a syste
 
 Building is then done by invoking `cmake --build .` or `make` in `<build-folder>`. 
 
-The resulting executables are located in `<build-folder>/main` and invoked like:
+The resulting executables are located in `<build-folder>/stud-main` and invoked like:
 
 ```bash
 cd <build-folder>
-<build-folder>/main/cecko6 <cecko-folder>/test/test1.c
+<build-folder>/stud-main/cecko1 <cecko-folder>/test/test1.c
 ```
 
 ## Visual Studio 2019
