@@ -12,3 +12,6 @@ BISON_SOURCE("framework_dump" "ckdumper.y" "ckdumper.cpp" "ckdumper.hpp")
 
 target_sources("framework" PRIVATE "ckir.cpp" "ckcontext.cpp")
 target_sources("framework" PUBLIC "ckbisonflex.hpp" "ckir.hpp" "cktables.hpp" "ckcontext.hpp" "ckgrptokens.hpp" "ckmain.hpp")
+
+target_sources("framework_dump" PRIVATE "ckir.cpp" "ckcontext.cpp")
+target_sources("framework_dump" PUBLIC "ckbisonflex.hpp" "ckir.hpp" "cktables.hpp" "ckcontext.hpp" "ckgrptokens.hpp" "ckmain.hpp")

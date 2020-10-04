@@ -3,7 +3,7 @@
 
 SOLUTION_LIBRARY("solution" "framework")
 
-SOLUTION_LIBRARY_DUMP("solution_dump" "framework" "framework_dump")
+SOLUTION_LIBRARY("solution_dump" "framework_dump")
 
 target_include_directories("solution" PUBLIC ".")
 
