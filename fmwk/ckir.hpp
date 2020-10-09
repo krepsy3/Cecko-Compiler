@@ -89,6 +89,13 @@ namespace cecko {
 		return llvm::Type::getInt8PtrTy(Context);
 	}
 
+	inline CKIRTypeObs CKGetPtrType(CKIRTypeObs element)
+	{
+		if (element->isVoidTy())
+			return CKGetInt8PtrType(element->getContext());
+		return element->getPointerTo();
+	}
+
 	inline CKIRTypeObs CKGetArrayType(CKIRTypeObs element, CKIRConstantIntObs size)
 	{
 		return llvm::ArrayType::get(element, size->getValue().getSExtValue());

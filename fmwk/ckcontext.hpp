@@ -25,13 +25,19 @@ namespace cecko {
 			SYNTAX,
 			UNCHAR,
 			NOFILE,
+			UNDEF_IDF,
 		};
 
 		enum err_i {
 		};
 
+		enum err_n {
+			INCOMPATIBLE,
+		};
+
 		void message(err_s err, loc_t loc, std::string_view msg);
 		void message(err_i err, loc_t loc, int i);
+		void message(err_n err, loc_t loc);
 
 		loc_t line() const { return line_; }
 		loc_t incline() { return line_++; }		// returns line value before increment

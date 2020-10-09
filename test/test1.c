@@ -54,6 +54,27 @@ int fib(int x)
 	}
 }
 
+void stringtest(void)
+{
+	char arr[100];
+	int i;
+	char t[40];
+	sprintf( arr, "%d %s", 1, "text");
+	printf("%s\n", arr);
+	i = -1;
+	t[0] = 0;
+	sscanf( arr, "%d%s", &i, t);
+	printf("%d %s\n", i, t);
+	/*
+	printf("Enter a number\n");
+	scanf("%d", &i);
+	printf("The number was %d\n", i);
+	*/
+	memset(t, 'X', 39);
+	t[39] = 0;
+	printf("%s\n", t);
+}
+
 int main(int argc, char** argv)
 {
 	const char* z;
@@ -77,5 +98,6 @@ int main(int argc, char** argv)
 	n = 20;
 	s = fib(n);
 	printf("fib(%d) returned %d\n", n, s);
+	stringtest();
 	return 0;
 }

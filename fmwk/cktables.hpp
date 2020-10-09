@@ -218,6 +218,7 @@ namespace cecko {
 		virtual CKIRTypeObs get_ir() const = 0;
 		virtual bool is_void() const { return false; }
 		virtual bool is_bool() const { return false; }
+		virtual bool is_char() const { return false; }
 		virtual bool is_int() const { return false; }
 		virtual bool is_array() const { return false; }
 		virtual bool is_function() const { return false; }
@@ -299,7 +300,7 @@ namespace cecko {
 	class CKPtrType : public CIAbstractType {
 	public:
 		explicit CKPtrType(const CKTypeRefPack& points_to)
-			: points_to_(points_to), irt_(points_to.type->get_ir()->getPointerTo())
+			: points_to_(points_to), irt_(CKGetPtrType(points_to.type->get_ir()))
 		{}
 
 		virtual std::size_t hash() const { return compute_hash(points_to_); }
@@ -840,13 +841,7 @@ namespace cecko {
 		}
 
 	private:
-		void declare_library()
-		{
-			globtable_.declare_function("printf", module_, typetable_.get_function_type(
-				typetable_.get_int_type(),
-				{ typetable_.get_pointer_type({ typetable_.get_char_type(), true }) },
-				true));
-		}
+		void declare_library();
 
 		CKIREnvironmentObs irenv_;
 		CKIRModuleObs module_;
