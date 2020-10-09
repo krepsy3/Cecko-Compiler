@@ -23,6 +23,13 @@ namespace {
 	};
 	*/
 	const char* err_n_msg[] = {
+		"INTERNAL ERROR",
+		"expression is void",
+		"array expression is not an lvalue",
+		"name does not denote a value",
+		"expression is not a number",
+		"expression is not a pointer",
+		"expression is not a number or pointer",
 		"Incompatible operand(s)",
 	};
 }

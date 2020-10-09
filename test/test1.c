@@ -59,6 +59,7 @@ void stringtest(void)
 	char arr[100];
 	int i;
 	char t[40];
+	printf("... stringtest ...\n");
 	sprintf( arr, "%d %s", 1, "text");
 	printf("%s\n", arr);
 	i = -1;
@@ -75,12 +76,31 @@ void stringtest(void)
 	printf("%s\n", t);
 }
 
-int main(int argc, char** argv)
+void pointerarithmeticstest(void)
+{
+	char arr[27];
+	char* p;
+	char* e;
+	char ch;
+	printf("... pointerarithmeticstest ...\n");
+	ch = 'A';
+	p = arr;
+	e = arr + 26;
+	while (p != e)
+	{
+		*p = ch;
+		ch = ch + 1;
+		p = p + 1;
+	}
+	*p = 0;
+	printf("%s\n", arr);
+}
+
+void argreverttest(int argc, char ** argv)
 {
 	const char* z;
 	int i;
-	int n;
-	int s;
+	printf("... argreverttest ...\n");
 	i = 0;
 	while (i < argc)
 	{
@@ -95,9 +115,23 @@ int main(int argc, char** argv)
 		pop_front(&root);
 		printf("popped \"%s\"\n", z);
 	}
+}
+
+void fibtest(void)
+{
+	int n;
+	int s;
+	printf("... fibtest ...\n");
 	n = 20;
 	s = fib(n);
 	printf("fib(%d) returned %d\n", n, s);
+}
+
+int main(int argc, char** argv)
+{
+	argreverttest(argc, argv);
+	fibtest();
 	stringtest();
+	pointerarithmeticstest();
 	return 0;
 }

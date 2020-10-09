@@ -32,6 +32,13 @@ namespace cecko {
 		};
 
 		enum err_n {
+			INTERNAL,
+			VOIDEXPR,
+			ARRAY_NOT_LVALUE,
+			NAME_NOT_VALUE,
+			NOT_NUMBER,
+			NOT_POINTER,
+			NOT_NUMBER_OR_POINTER,
 			INCOMPATIBLE,
 		};
 

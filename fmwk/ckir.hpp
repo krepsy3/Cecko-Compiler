@@ -116,6 +116,11 @@ namespace cecko {
 		return llvm::ConstantInt::get(llvm::Type::getInt1Ty(Context), V);
 	}
 
+	inline CKIRConstantIntObs CKGetInt8Constant(CKIRContextRef Context, std::int_fast8_t V)
+	{
+		return llvm::ConstantInt::get(llvm::Type::getInt8Ty(Context), V);
+	}
+
 	inline CKIRConstantIntObs CKGetInt32Constant(CKIRContextRef Context, std::int_fast32_t V)
 	{
 		return llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), V);
