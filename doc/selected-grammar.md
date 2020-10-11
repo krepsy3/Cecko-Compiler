@@ -245,18 +245,18 @@ init-declarator:
 
 storage-class-specifier:
 	typedef
-	auto
 
 type-specifier:
 	void
+	_Bool
+	char
 	int
-	double
 	struct-or-union-specifier
-	? enum-specifier
+	enum-specifier
 	typedef-name
 
 struct-or-union-specifier:
-	struct-or-union identifieropt { member-declaration-list }
+	struct-or-union identifier_opt { member-declaration-list }
 	struct-or-union identifier
 
 struct-or-union:
@@ -267,7 +267,7 @@ member-declaration-list:
 	member-declaration-list member-declaration
 
 member-declaration:
-	specifier-qualifier-list member-declarator-listopt ;
+	specifier-qualifier-list member-declarator-list_opt ;
 
 specifier-qualifier-list:
 	type-specifier-qualifier
@@ -284,16 +284,16 @@ member-declarator-list:
 member-declarator:
 	declarator
 
-? enum-specifier:
-	enum identifieropt { enumerator-list }
-	enum identifieropt { enumerator-list , }
+enum-specifier:
+	enum identifier_opt { enumerator-list }
+	enum identifier_opt { enumerator-list , }
 	enum identifier
 
-? enumerator-list:
+enumerator-list:
 	enumerator
 	enumerator-list , enumerator
 
-? enumerator:
+enumerator:
 	enumeration-constant
 	enumeration-constant = constant-expression
 
@@ -301,24 +301,22 @@ type-qualifier:
 	const
 
 declarator:
-	pointeropt direct-declarator
+	one-pointer_opt direct-declarator
 
 direct-declarator:
 	identifier
 	( declarator )
 	array-declarator
 	function-declarator
-	direct-declarator ( identifier-listopt )
 
 array-declarator:
-	direct-declarator [ type-qualifier-listopt assignment-expressionopt ]
+	direct-declarator [assignment-expression ]
 
 function-declarator:
 	direct-declarator ( parameter-type-list )
 
-pointer:
-	* type-qualifier-listopt
-	* type-qualifier-listopt pointer
+one-pointer:
+	* type-qualifier-list_opt
 
 type-qualifier-list:
 	type-qualifier
@@ -333,15 +331,15 @@ parameter-list:
 
 parameter-declaration:
 	declaration-specifiers declarator
-	declaration-specifiers abstract-declaratoropt
+	declaration-specifiers abstract-declarator_opt
 
 identifier-list:
 	identifier
 	identifier-list , identifier
 
 abstract-declarator:
-	pointer
-	pointeropt direct-abstract-declarator
+	one-pointer
+	one-pointer_opt direct-abstract-declarator
 
 direct-abstract-declarator:
 	( abstract-declarator )
@@ -349,10 +347,10 @@ direct-abstract-declarator:
 	function-abstract-declarator
 
 array-abstract-declarator:
-	direct-abstract-declaratoropt [ type-qualifier-listopt assignment-expressionopt ]
+	direct-abstract-declarator_opt [ assignment-expression ]
 
 function-abstract-declarator:
-	direct-abstract-declaratoropt ( parameter-type-listopt )
+	direct-abstract-declarator_opt ( parameter-type-list_opt )
 
 typedef-name:
 	identifier
@@ -373,7 +371,7 @@ labeled-statement:
 	identifier : statement
 
 compound-statement:
-	{ block-item-listopt }
+	{ block-item-list_opt }
 
 block-item-list:
 	block-item
@@ -384,7 +382,7 @@ block-item:
 	statement
 
 expression-statement:
-	expressionopt ;
+	expression_opt ;
 
 selection-statement:
 	if ( expression ) statement
@@ -393,13 +391,13 @@ selection-statement:
 iteration-statement:
 	while ( expression ) statement
 	do statement while ( expression ) ;
-	for ( expressionopt ; expressionopt ; expressionopt ) statement
+	for ( expression_opt ; expression_opt ; expression_opt ) statement
 
 jump-statement:
 	goto identifier ;
 	continue ;
 	break ;
-	return expressionopt ;
+	return expression_opt ;
 ```
 
 ### External definitions
@@ -414,9 +412,6 @@ external-declaration:
 	declaration
 
 function-definition:
-	declaration-specifiers declarator declaration-listopt compound-statement
+	declaration-specifiers declarator compound-statement
 
-declaration-list:
-	no-leading-attribute-declaration
-	declaration-list no-leading-attribute-declaration
 ```
