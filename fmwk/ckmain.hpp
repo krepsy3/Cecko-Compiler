@@ -6,6 +6,7 @@
 
 #include <string>
 #include <iostream>
+#include <sstream>
 
 namespace cecko {
 
@@ -141,7 +142,18 @@ namespace cecko {
 		bool dump_code()
 		{
 			std::cout << "========== IR module ==========" << std::endl;
-			the_tables.dump_ir_module(std::cout);
+			{
+				std::stringstream oss;
+				the_tables.dump_ir_module(oss);
+				for (;;)
+				{
+					std::string lbuf;
+					auto rc = !!std::getline(oss, lbuf);
+					if (!rc)
+						break;
+					std::cout << "::: " << lbuf << std::endl;
+				}
+			}
 
 			if (!oname.empty())
 			{

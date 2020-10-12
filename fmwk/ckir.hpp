@@ -24,6 +24,7 @@
 #include "llvm/Support/raw_os_ostream.h"
 
 #include <iostream>
+#include <cstdio>
 
 namespace cecko {
 	// numbers
@@ -184,8 +185,7 @@ namespace cecko {
 
 		int run_main(CKIRFunctionObs fnc, int argc, char** argv)
 		{
-			//llvm::raw_os_ostream raw_cerr(std::cerr);
-			auto&& raw_cerr = llvm::errs();
+			auto&& os = llvm::outs();
 			// Now we going to create JIT
 			std::string errStr;
 			auto EE =
@@ -194,23 +194,26 @@ namespace cecko {
 				.create();
 
 			if (!EE) {
-				raw_cerr << "========== Failed to construct ExecutionEngine: " << errStr << "==========\n";
+				os << "========== Failed to construct ExecutionEngine: " << errStr << "==========\n";
 				return 1;
 			}
 
 			if (verifyModule(*ckirmoduleobs_)) {
-				raw_cerr << "========== Error constructing function ==========\n";
+				os << "========== Error constructing function ==========\n";
 				return 1;
 			}
 
-			raw_cerr << "========== starting main() ==========\n";
+			os << "========== starting main() ==========\n";
+			os.flush();	// switch to stdout
 
 			std::vector<llvm::GenericValue> Args(2);
 			Args[0].IntVal = llvm::APInt(32, argc);
 			Args[1].PointerVal = argv;
 			auto GV = EE->runFunction(fnc, Args);
 
-			raw_cerr << "\n========== main() returned " << GV.IntVal << " ==========\n";
+			//std::fflush(stdout);	// switch back to std::cout
+			os.flush();
+			os << "\n========== main() returned " << GV.IntVal << " ==========\n";
 			return GV.IntVal.getSExtValue();
 		}
 

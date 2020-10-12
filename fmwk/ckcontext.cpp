@@ -38,23 +38,23 @@ namespace cecko {
 
 	void context::message(err_s err, loc_t loc, std::string_view msg)
 	{
-		fprintf(stderr, "Error (line %d): ", loc);
-		fprintf(stderr, err_s_msg[err], msg.data());
-		fputc('\n', stderr);
+		fprintf(stdout, "Error (line %d): ", loc);
+		fprintf(stdout, err_s_msg[err], msg.data());
+		fputc('\n', stdout);
 	}
 	/*
 	void context::message(err_i err, loc_t loc, int i)
 	{
-		fprintf(stderr, "Error (line %d): ", loc);
-		fprintf(stderr, err_i_msg[err], i);
-		fputc('\n', stderr);
+		fprintf(stdout, "Error (line %d): ", loc);
+		fprintf(stdout, err_i_msg[err], i);
+		fputc('\n', stdout);
 	}
 	*/
 	void context::message(err_n err, loc_t loc)
 	{
-		fprintf(stderr, "Error (line %d): ", loc);
-		fprintf(stderr, err_n_msg[err]);
-		fputc('\n', stderr);
+		fprintf(stdout, "Error (line %d): ", loc);
+		fprintf(stdout, err_n_msg[err]);
+		fputc('\n', stdout);
 	}
 
 	void CKTables::declare_library()
