@@ -1,4 +1,4 @@
-﻿# CMakeList.txt 
+# CMakeList.txt 
 #
 
 SOLUTION_LIBRARY("solution" "framework")

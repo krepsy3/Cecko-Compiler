@@ -7,14 +7,13 @@
 
 %}
 
-/* NEVER SET THIS INTERNALLY - SHALL BE SET BY CMAKE: %option outfile="../private/cecko-scn.cpp" */
+/* NEVER SET %option outfile INTERNALLY - SHALL BE SET BY CMAKE */
 
 %option noyywrap nounput noinput
 %option batch never-interactive reentrant
 %option nounistd 
 
-/* AVOID THIS - DO NOT CREATE UNMANAGEABLE BYPRODUCT FILES: backup perf-report */
-
+/* AVOID backup perf-report - DO NOT CREATE UNMANAGEABLE BYPRODUCT FILES */
 
 %%
 
