@@ -101,6 +101,7 @@ void argreverttest(int argc, char ** argv)
 	const char* z;
 	int i;
 	printf("... argreverttest ...\n");
+	printf("sizeof(struct Str) = %d\n", sizeof(struct Str));
 	i = 0;
 	while (i < argc)
 	{

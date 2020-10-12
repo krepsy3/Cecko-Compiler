@@ -138,6 +138,14 @@ namespace cecko {
 
 	CKIRConstantObs CKCreateExternVariable(CKIRTypeObs irtp, const std::string& name, CKIRModuleObs M);
 
+	using CKIRDataLayoutObs = const llvm::DataLayout*;
+
+	inline std::int_fast64_t CKGetTypeSize(CKIRDataLayoutObs DataLayout, CKIRTypeObs Ty)
+	{
+		auto ts = DataLayout->getTypeAllocSize(Ty);
+		return ts;
+	}
+
 	class CKIREnvironment {
 	public:
 		CKIREnvironment();
@@ -158,10 +166,16 @@ namespace cecko {
 			return ckirmoduleobs_;
 		}
 
+		CKIRDataLayoutObs data_layout() const
+		{
+			return &*ckirdatalayoutptr_;
+		}
+
 	private:
 		std::unique_ptr< llvm::LLVMContext> ckircontextptr_;
 		std::unique_ptr< llvm::Module> ckirmoduleptr_;
 		CKIRModuleObs ckirmoduleobs_;
+		std::unique_ptr< llvm::DataLayout> ckirdatalayoutptr_;
 	};
 
 	using CKIREnvironmentObs = CKIREnvironment*;

@@ -268,7 +268,8 @@ namespace cecko {
 		: irenv_(irenv),
 		typetable_(irenv->context()),
 		globtable_(),
-		module_(irenv->module())
+		module_(irenv->module()),
+		data_layout_(irenv->data_layout())
 	{
 		declare_library();
 	}
@@ -294,7 +295,8 @@ namespace cecko {
 		globtable_(tab->globtable()),
 		loctable_(nullptr),
 		module_(tab->module()),
-		builder_(tab->module()->getContext())
+		builder_(tab->module()->getContext()),
+		data_layout_(tab->data_layout())
 	{
 	}
 

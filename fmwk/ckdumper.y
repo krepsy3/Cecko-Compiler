@@ -83,6 +83,7 @@ YY_DECL;
 %token						CONTINUE	"continue"
 %token						BREAK		"break"
 %token						RETURN		"return"
+%token						SIZEOF		"sizeof"
 
 %token<cecko::CIName>				IDF			"identifier"
 %token<cecko::CIName>				TYPEIDF		"type identifier"
@@ -148,6 +149,7 @@ token_n:
     | CONTINUE				 { $$ = "continue"; }
     | BREAK				 { $$ = "break"; }
     | RETURN				 { $$ = "return"; }
+    | SIZEOF				 { $$ = "sizeof"; }
     | LBRA				 { $$ = "["; }
     | RBRA				 { $$ = "]"; }
     | LPAR				 { $$ = "("; }

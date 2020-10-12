@@ -108,6 +108,7 @@ namespace cecko {
 		ckircontextptr_ = std::make_unique<llvm::LLVMContext>();
 		ckirmoduleptr_ = std::make_unique<llvm::Module>("test", *ckircontextptr_);
 		ckirmoduleobs_ = &*ckirmoduleptr_;
+		ckirdatalayoutptr_ = std::make_unique<llvm::DataLayout>(ckirmoduleobs_);
 	}
 
 	void CKIREnvironment::dump_module(std::ostream& os, CKIRModuleObs module) const

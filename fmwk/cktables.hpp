@@ -625,11 +625,17 @@ namespace cecko {
 
 		std::error_code write_bitcode_module(const std::string& fname) const;
 
+		CKIRDataLayoutObs data_layout() const
+		{
+			return data_layout_;
+		}
+
 	private:
 		void declare_library();
 
 		CKIREnvironmentObs irenv_;
 		CKIRModuleObs module_;
+		CKIRDataLayoutObs data_layout_;
 
 		CKTypeTable typetable_;
 		CKGlobalTable globtable_;
@@ -669,6 +675,11 @@ namespace cecko {
 			return &builder_;
 		}
 
+		CKIRDataLayoutObs data_layout() const
+		{
+			return data_layout_;
+		}
+
 	private:
 		CKTypeTableObs typetable_;
 		CKGlobalTableObs globtable_;
@@ -676,6 +687,7 @@ namespace cecko {
 		CKLocalTableObs loctable_;
 
 		CKIRBuilder builder_;
+		CKIRDataLayoutObs data_layout_;
 	};
 }
 
