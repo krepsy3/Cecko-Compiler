@@ -607,8 +607,8 @@ namespace cecko {
 
 	class CKFunction : public CKAbstractNamed {
 	public:
-		CKFunction(CKIRModuleObs M, CKFunctionTypeObs type, const CIName& name)
-			: type_(type), irf_(CKCreateFunction(type->get_function_ir(), name, M))
+		CKFunction(CKIRModuleObs M, CKFunctionTypeObs type, const CIName& irname)
+			: type_(type), irf_(CKCreateFunction(type->get_function_ir(), irname, M))
 		{}
 		virtual bool is_function() const { return true; }
 		bool is_defined() const { return !!loctab_; }
@@ -638,9 +638,19 @@ namespace cecko {
 			auto var = CKCreateGlobalVariable(irtp, name, M);
 			return vars_.try_emplace(name, type_pack, var);
 		}
+		CKGlobalVarObs declare_extern_variable(CKIRModuleObs M, const std::string& name, const CKTypeRefPack& type_pack)
+		{
+			auto irtp = type_pack.type->get_ir();
+			auto var = CKCreateExternVariable(irtp, name, M);
+			return vars_.try_emplace(name, type_pack, var);
+		}
 		CKFunctionObs declare_function(const CIName& n, CKIRModuleObs M, CKFunctionTypeObs type)
 		{
 			return fncs_.try_emplace(n, M, type, n);
+		}
+		CKFunctionObs declare_function(const CIName& n, CKIRModuleObs M, CKFunctionTypeObs type, const std::string& irname)
+		{
+			return fncs_.try_emplace(n, M, type, irname);
 		}
 		CKFunctionObs find_function(const CIName& n)
 		{

@@ -19,7 +19,7 @@ else()
 	include_directories(${LLVM_INCLUDE_DIRS})
 	add_definitions(${LLVM_DEFINITIONS})
 
-	llvm_map_components_to_libnames(LLVM_LIBS_USED support core mcjit x86codegen)
+	llvm_map_components_to_libnames(LLVM_LIBS_USED core mcjit nativecodegen)	# executionengine interpreter mc support x86codegen
 endif()
 
 set(THREADS_PREFER_PTHREAD_FLAG True)
@@ -53,9 +53,11 @@ function(CREATE_TARGET TARGET)
 	COMMON_OPTIONS(${TARGET})
 
 	if(NOT DEFINED LLVM_PACKAGE_VERSION)
+		message("LLVM_PACKAGE_VERSION was not defined, trying to enumerate libraries explicitly")
 		target_link_directories(${TARGET} PUBLIC "${LLVM_OBJ_ROOT}/lib")
-		target_link_libraries(${TARGET} PUBLIC "LLVMCore" "LLVMExecutionEngine" "LLVMInterpreter" "LLVMMC" "LLVMMCJIT" "LLVMSupport" "LLVMX86CodeGen" "LLVMX86Desc" "LLVMX86Info" "LLVMExecutionEngine" "LLVMRuntimeDyld" "LLVMMCDisassembler" "LLVMAsmPrinter" "LLVMDebugInfoDWARF" "LLVMCFGuard" "LLVMGlobalISel" "LLVMSelectionDAG" "LLVMCodeGen" "LLVMTarget" "LLVMBitWriter" "LLVMScalarOpts" "LLVMAggressiveInstCombine" "LLVMInstCombine" "LLVMTransformUtils" "LLVMAnalysis" "LLVMObject" "LLVMBitReader" "LLVMMCParser" "LLVMMC" "LLVMDebugInfoCodeView" "LLVMDebugInfoMSF" "LLVMTextAPI" "LLVMProfileData" "LLVMCore" "LLVMBinaryFormat" "LLVMRemarks" "LLVMBitstreamReader" "LLVMX86Utils" "LLVMSupport" "LLVMDemangle")
+		target_link_libraries(${TARGET} PUBLIC "LLVMCore" "LLVMInterpreter" "LLVMMC" "LLVMMCJIT" "LLVMSupport" "LLVMX86CodeGen" "LLVMX86Desc" "LLVMX86Info" "LLVMRuntimeDyld" "LLVMMCDisassembler" "LLVMAsmPrinter" "LLVMDebugInfoDWARF" "LLVMCFGuard" "LLVMGlobalISel" "LLVMSelectionDAG" "LLVMCodeGen" "LLVMTarget" "LLVMBitWriter" "LLVMScalarOpts" "LLVMAggressiveInstCombine" "LLVMInstCombine" "LLVMTransformUtils" "LLVMAnalysis" "LLVMObject" "LLVMBitReader" "LLVMMCParser" "LLVMMC" "LLVMDebugInfoCodeView" "LLVMDebugInfoMSF" "LLVMTextAPI" "LLVMProfileData" "LLVMCore" "LLVMBinaryFormat" "LLVMRemarks" "LLVMBitstreamReader" "LLVMX86Utils" "LLVMSupport" "LLVMDemangle" "LLVMExecutionEngine")
 	else()
+		# message("LLVM_LIBS_USED = ${LLVM_LIBS_USED}")
 		target_link_libraries(${TARGET} PUBLIC ${LLVM_LIBS_USED})
 	endif()	
 

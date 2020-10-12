@@ -61,11 +61,11 @@ void stringtest(void)
 	char t[40];
 	printf("... stringtest ...\n");
 	sprintf( arr, "%d %s", 1, "text");
-	printf("%s\n", arr);
+	printf("sprintf: %s\n", arr);
 	i = -1;
 	t[0] = 0;
 	sscanf( arr, "%d%s", &i, t);
-	printf("%d %s\n", i, t);
+	printf("sscanf: %d %s\n", i, t);
 	/*
 	printf("Enter a number\n");
 	scanf("%d", &i);
@@ -127,11 +127,25 @@ void fibtest(void)
 	printf("fib(%d) returned %d\n", n, s);
 }
 
+_Bool status;
+
+_Bool test(void)
+{
+	return status;
+}
+
 int main(int argc, char** argv)
 {
+	status = 0;
+	printf("This is test1.c main()\n");
 	argreverttest(argc, argv);
 	fibtest();
 	stringtest();
 	pointerarithmeticstest();
+	if (test())
+	{
+		printf("Going to die\n");
+		printf("DEATH=%s\n", 999999999);
+	}
 	return 0;
 }
