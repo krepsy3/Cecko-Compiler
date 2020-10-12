@@ -8,6 +8,8 @@ context for the compiler
 
 #include <cstdio>
 #include <cstdarg>
+#include <sstream>
+#include <iomanip>
 
 #include "ckcontext.hpp"
 
@@ -99,6 +101,19 @@ namespace {
 
 namespace cecko {
 
+	std::string context::escape(std::string_view s)
+	{
+		std::ostringstream r;
+		for (std::uint8_t ch : s)
+		{
+			if (ch < 32 || ch > 126 || ch == '\'' || ch == '"')
+				r << "\\x" << std::hex << std::setfill('0') << std::setw(2) << (int)ch;
+			else
+				r.put(ch);
+		}
+		return r.str();
+	}
+
 	void context::message(err_s err, loc_t loc, std::string_view msg)
 	{
 		/*
@@ -107,7 +122,7 @@ namespace cecko {
 		fputc('\n', stdout);
 		*/
 		auto&& e = err_s_msg[err];
-		std::cout << "Error (line " << loc << "): " << e[0] << msg << e[1] << std::endl;
+		std::cout << "Error (line " << loc << "): " << e[0] << escape(msg) << e[1] << std::endl;
 	}
 	/*
 	void context::message(err_i err, loc_t loc, int i)

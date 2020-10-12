@@ -170,15 +170,15 @@ token_n:
 token_s:
 	IDF { 
 		$$.first = "identifier"; 
-		$$.second = ! $1.empty() ? "[" + $1 + "]" : ""; 
+		$$.second = ! $1.empty() ? "[" + cecko::context::escape($1) + "]" : ""; 
 	}
 	| TYPEIDF { 
 		$$.first = "type identifier"; 
-		$$.second = ! $1.empty() ? "[" + $1 + "]" : ""; 
+		$$.second = ! $1.empty() ? "[" + cecko::context::escape($1) + "]" : ""; 
 	}
 	| STRLIT{ 
 		$$.first = "string literal"; 
-		$$.second = ! $1.empty() ? "[" + $1 + "]" : "";
+		$$.second = "\"" + cecko::context::escape($1) + "\"";
 	}
 	| CMPO{ 
 		$$.first = "CMPO"; 

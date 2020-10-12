@@ -46,6 +46,8 @@ namespace cecko {
 		void message(err_i err, loc_t loc, int i);
 		void message(err_n err, loc_t loc);
 
+		static std::string escape(std::string_view s);
+
 		loc_t line() const { return line_; }
 		loc_t incline() { return line_++; }		// returns line value before increment
 	private:
