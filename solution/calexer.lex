@@ -20,7 +20,7 @@
 
 \n				ctx->incline();
 
-.				ctx->message(cecko::context::UNCHAR, ctx->line(), yytext);
+.				ctx->message(cecko::errors::UNCHAR, ctx->line(), yytext);
 
 <<EOF>>			return cecko::parser::make_EOF(ctx->line());
 

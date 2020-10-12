@@ -109,7 +109,7 @@ namespace cecko {
 
 	void parser::error(const location_type& l, const std::string& m)
 	{
-		ctx->message(cecko::context::SYNTAX, l, m);
+		ctx->message(cecko::errors::SYNTAX, l, m);
 	}
 
 }

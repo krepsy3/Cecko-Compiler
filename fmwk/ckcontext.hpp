@@ -16,10 +16,7 @@ namespace cecko {
 
 	using loc_t = unsigned;
 
-	class context : public CKContext {
-	public:
-		context(CKTablesObs tables) : CKContext(tables), line_(1) {}
-
+	namespace errors {
 		// messages
 		enum err_s {
 			SYNTAX,
@@ -41,10 +38,15 @@ namespace cecko {
 			NOT_NUMBER_OR_POINTER,
 			INCOMPATIBLE,
 		};
+	}
 
-		void message(err_s err, loc_t loc, std::string_view msg);
-		void message(err_i err, loc_t loc, int i);
-		void message(err_n err, loc_t loc);
+	class context : public CKContext {
+	public:
+		context(CKTablesObs tables) : CKContext(tables), line_(1) {}
+
+		void message(errors::err_s err, loc_t loc, std::string_view msg);
+		void message(errors::err_i err, loc_t loc, int i);
+		void message(errors::err_n err, loc_t loc);
 
 		static std::string escape(std::string_view s);
 

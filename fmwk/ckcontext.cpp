@@ -114,7 +114,7 @@ namespace cecko {
 		return r.str();
 	}
 
-	void context::message(err_s err, loc_t loc, std::string_view msg)
+	void context::message(errors::err_s err, loc_t loc, std::string_view msg)
 	{
 		/*
 		fprintf(stdout, "Error (line %d): ", loc);
@@ -125,13 +125,13 @@ namespace cecko {
 		std::cout << "Error (line " << loc << "): " << e[0] << escape(msg) << e[1] << std::endl;
 	}
 	/*
-	void context::message(err_i err, loc_t loc, int i)
+	void context::message(errors::err_i err, loc_t loc, int i)
 	{
 		auto&& e = err_i_msg[err];
 		std::cout << "Error (line " << loc << "): " << e[0] << i << e[1] << std::endl;
 	}
 	*/
-	void context::message(err_n err, loc_t loc)
+	void context::message(errors::err_n err, loc_t loc)
 	{
 		auto&& e = err_n_msg[err];
 		std::cout << "Error (line " << loc << "): " << e << std::endl;

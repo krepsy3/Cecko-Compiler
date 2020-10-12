@@ -89,7 +89,7 @@ namespace cecko {
 			FILE* iff = fopen(input_fname.c_str(), "r");
 			if (iff == nullptr)
 			{
-				ctx.message(cecko::context::NOFILE, 0, input_fname);
+				ctx.message(cecko::errors::NOFILE, 0, input_fname);
 				return false;
 			}
 
