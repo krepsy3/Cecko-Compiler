@@ -82,6 +82,7 @@ using namespace casem;
 %token						CONTINUE	"continue"
 %token						BREAK		"break"
 %token						RETURN		"return"
+%token						SIZEOF		"sizeof"
 
 %token<CIName>				IDF			"identifier"
 %token<CIName>				TYPEIDF		"type identifier"
