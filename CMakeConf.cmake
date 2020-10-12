@@ -49,6 +49,12 @@ function(COMMON_OPTIONS TARGET)
 	SET_TARGET_OPTIONS(${TARGET} "" "/wd4244")
 	SET_TARGET_OPTIONS(${TARGET} "" "/wd4267")
 	SET_TARGET_OPTIONS(${TARGET} "" "/wd4624")
+
+	if(MSVC)
+	else()
+		target_link_options(${TARGET} PUBLIC "-rdynamic")	# for self-references to ckrt_printf etc
+	endif()
+
 endfunction()
 
 function(CREATE_TARGET TARGET)
