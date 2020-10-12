@@ -90,17 +90,9 @@ namespace cecko {
 		return llvm::Type::getInt8PtrTy(Context);
 	}
 
-	inline CKIRTypeObs CKGetPtrType(CKIRTypeObs element)
-	{
-		if (element->isVoidTy())
-			return CKGetInt8PtrType(element->getContext());
-		return element->getPointerTo();
-	}
+	CKIRTypeObs CKGetPtrType(CKIRTypeObs element);
 
-	inline CKIRTypeObs CKGetArrayType(CKIRTypeObs element, CKIRConstantIntObs size)
-	{
-		return llvm::ArrayType::get(element, size->getValue().getSExtValue());
-	}
+	CKIRTypeObs CKGetArrayType(CKIRTypeObs element, CKIRConstantIntObs size);
 
 	inline CKIRStructTypeObs CKCreateStructType(CKIRContextRef Context, const std::string& name)
 	{
@@ -142,56 +134,17 @@ namespace cecko {
 		return llvm::cast<llvm::ConstantInt>(v);
 	}
 
-	inline CKIRConstantObs CKCreateGlobalVariable(CKIRTypeObs irtp, const std::string& name, CKIRModuleObs M)
-	{
-		auto var = M->getOrInsertGlobal(name, irtp);
-		auto gvar = llvm::cast<llvm::GlobalVariable>(var);
-		if (irtp->isAggregateType())
-			gvar->setInitializer(llvm::ConstantAggregateZero::get(irtp));
-		else if (irtp->isPointerTy())
-			gvar->setInitializer(llvm::ConstantPointerNull::get(llvm::cast<llvm::PointerType>(irtp)));
-		else if (irtp->isIntegerTy())
-			gvar->setInitializer(llvm::ConstantInt::get(irtp, 0));
-		else
-			assert(0);
-		return var;
-	}
+	CKIRConstantObs CKCreateGlobalVariable(CKIRTypeObs irtp, const std::string& name, CKIRModuleObs M);
 
-	inline CKIRConstantObs CKCreateExternVariable(CKIRTypeObs irtp, const std::string& name, CKIRModuleObs M)
-	{
-		auto var = M->getOrInsertGlobal(name, irtp);
-		auto gvar = llvm::cast<llvm::GlobalVariable>(var);
-		gvar->setExternallyInitialized(true);
-		return var;
-	}
+	CKIRConstantObs CKCreateExternVariable(CKIRTypeObs irtp, const std::string& name, CKIRModuleObs M);
 
 	class CKIREnvironment {
 	public:
-		CKIREnvironment()
-		{
-			llvm::InitializeNativeTarget();
-			llvm::InitializeNativeTargetAsmPrinter();
-			ckircontextptr_ = std::make_unique<llvm::LLVMContext>();
-			ckirmoduleptr_ = std::make_unique<llvm::Module>("test", *ckircontextptr_);
-			ckirmoduleobs_ = &*ckirmoduleptr_;
-		}
+		CKIREnvironment();
 
-		void dump_module(std::ostream& os, CKIRModuleObs module) const
-		{
-			llvm::raw_os_ostream raw_os(os);
-			raw_os << *module;
-		}
+		void dump_module(std::ostream& os, CKIRModuleObs module) const;
 
-		std::error_code write_bitcode_module(const std::string& fname, CKIRModuleObs module) const
-		{
-			std::error_code oec;
-			llvm::raw_fd_ostream ofile(fname, oec);
-			if (!oec)
-			{
-				llvm::WriteBitcodeToFile(*module, ofile);
-			}
-			return oec;
-		}
+		std::error_code write_bitcode_module(const std::string& fname, CKIRModuleObs module) const;
 
 		int run_main(CKIRFunctionObs fnc, int argc, char** argv);
 		

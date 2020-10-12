@@ -175,23 +175,7 @@ namespace cecko {
 
 	using CITypeMangle = std::string;
 
-	// DECLARATION GENERATOR
-
 	using CIDecl = std::string;
-
-	inline CIDecl decl_const(bool is_const)
-	{
-		return is_const ? "const " : "";
-	}
-
-	inline CIDecl decl_dtor(bool no_space, bool in_suffix, const CIDecl& dtor)
-	{
-		return in_suffix && !dtor.empty() && dtor[0] == '*'
-			? "(" + dtor + ")"
-			: (no_space || dtor.empty() || dtor[0] == '*' || dtor[0] == '('
-				? dtor
-				: " " + dtor);
-	}
 
 	// TYPES
 
@@ -247,7 +231,7 @@ namespace cecko {
 		virtual CKIRTypeObs get_ir() const { return irt_; }
 		virtual bool is_void() const { return true; }
 		virtual CITypeMangle mangle() const { return "V"; }
-		virtual CIDecl declaration(bool is_const, const CIDecl& dtor) const { return decl_const(is_const) + "void" + decl_dtor(false, false, dtor); }
+		virtual CIDecl declaration(bool is_const, const CIDecl& dtor) const;
 	private:
 		CKIRTypeObs irt_;
 	};
@@ -262,7 +246,7 @@ namespace cecko {
 		virtual bool is_bool() const { return true; }
 		virtual bool is_signed() const { return false; }
 		virtual CITypeMangle mangle() const { return "B"; }
-		virtual CIDecl declaration(bool is_const, const CIDecl& dtor) const { return decl_const(is_const) + "bool" + decl_dtor(false, false, dtor); }
+		virtual CIDecl declaration(bool is_const, const CIDecl& dtor) const;
 	private:
 		CKIRTypeObs irt_;
 	};
@@ -277,7 +261,7 @@ namespace cecko {
 		virtual bool is_char() const { return true; }
 		virtual bool is_signed() const { return false; }
 		virtual CITypeMangle mangle() const { return "X"; }
-		virtual CIDecl declaration(bool is_const, const CIDecl& dtor) const { return decl_const(is_const) + "char" + decl_dtor(false, false, dtor); }
+		virtual CIDecl declaration(bool is_const, const CIDecl& dtor) const;
 	private:
 		CKIRTypeObs irt_;
 	};
@@ -292,7 +276,7 @@ namespace cecko {
 		virtual bool is_int() const { return true; }
 		virtual bool is_signed() const { return true; }
 		virtual CITypeMangle mangle() const { return "I"; }
-		virtual CIDecl declaration(bool is_const, const CIDecl& dtor) const { return decl_const(is_const) + "int" + decl_dtor(false, false, dtor); }
+		virtual CIDecl declaration(bool is_const, const CIDecl& dtor) const;
 	private:
 		CKIRTypeObs irt_;
 	};
@@ -314,7 +298,7 @@ namespace cecko {
 		virtual const CKTypeRefPack& get_pointer_points_to() const { return points_to_; }
 
 		virtual CITypeMangle mangle() const { return (points_to_.is_const ? "pc" : "p") + points_to_.type->mangle(); }
-		virtual CIDecl declaration(bool is_const, const CIDecl& dtor) const { return points_to_.type->declaration(points_to_.is_const, "*" + (is_const ? "const" + decl_dtor(false, false, dtor) : decl_dtor(true, false, dtor))); }
+		virtual CIDecl declaration(bool is_const, const CIDecl& dtor) const;
 	private:
 		CKTypeRefPack points_to_;
 		CKIRTypeObs irt_;
@@ -338,7 +322,7 @@ namespace cecko {
 		virtual CKIRConstantIntObs get_array_size() const { return size_; }
 
 		virtual CITypeMangle mangle() const { return "a" + std::to_string(size_->getValue().getZExtValue()) + element_type_->mangle(); }
-		virtual CIDecl declaration(bool is_const, const CIDecl& dtor) const { return element_type_->declaration(is_const, decl_dtor(true, true, dtor) + "[" + std::to_string(size_->getValue().getZExtValue()) + "]"); }
+		virtual CIDecl declaration(bool is_const, const CIDecl& dtor) const;
 	private:
 		CKTypeObs element_type_;
 		CKIRConstantIntObs size_;
@@ -374,21 +358,7 @@ namespace cecko {
 		CKStructType(CKIRContextRef Context, const CIName& n)
 			: defined_(false), irt_(CKCreateStructType(Context, n))
 		{}
-		void finalize(const CKStructItemArray& items)
-		{
-			assert(!defined_);
-			CKIRTypeObsArray elements_ir;
-			unsigned int idx = 0;
-			for (auto&& a : items)
-			{
-				elements_ir.push_back(a.pack.type->get_ir());
-				auto p = elements_.try_emplace(a.name, a.pack, idx);
-				elements_ordered_.push_back(p);
-				++idx;
-			}
-			irt_->setBody(elements_ir);
-			defined_ = true;
-		}
+		void finalize(const CKStructItemArray& items);
 
 		virtual std::size_t hash() const { return std::hash<CIName>{}(get_name()); }
 		virtual CKIRTypeObs get_ir() const { return irt_; }
@@ -401,14 +371,8 @@ namespace cecko {
 		}
 
 		virtual CITypeMangle mangle() const { return "S" + get_name() + '$'; }
-		virtual CIDecl declaration(bool is_const, const CIDecl& dtor) const { return decl_const(is_const) + "struct " + get_name() + decl_dtor(false, false, dtor); }
-		void dump(CIOStream& os) const
-		{
-			os << "struct " << get_name() << "{" << CIEndl;
-			for (auto&& a : elements_ordered_)
-				os << "\t" << a->get_type_pack().type->declaration(a->get_type_pack().is_const, a->get_name()) << ";" << CIEndl;
-			os << "};" << CIEndl;
-		}
+		virtual CIDecl declaration(bool is_const, const CIDecl& dtor) const;
+		void dump(CIOStream& os) const;
 	private:
 		using element_storage_type = CINamedStorage< CKStructElement>;
 		bool defined_;
@@ -421,31 +385,11 @@ namespace cecko {
 
 	class CKFunctionType : public CIAbstractType {
 	public:
-		CKFunctionType(CKTypeObs ret_type, CKTypeObsArray arg_types, bool variadic = false)
-			: ret_type_(ret_type), arg_types_(std::move(arg_types)), variadic_(variadic), irt_(nullptr)
-		{
-			CKIRTypeObsArray arg_ir_types(arg_types_.size());
-			std::transform(arg_types_.begin(), arg_types_.end(), arg_ir_types.begin(), [](auto&& a) { return a->get_ir(); });
-			irt_ = CKGetFunctionType(ret_type_->get_ir(), std::move(arg_ir_types), variadic_);
-		}
+		CKFunctionType(CKTypeObs ret_type, CKTypeObsArray arg_types, bool variadic = false);
 
-		bool operator==(const CKFunctionType& b) const
-		{
-			bool eq = ret_type_ == b.ret_type_
-				&& arg_types_.size() == b.arg_types_.size()
-				&& variadic_ == b.variadic_;
-			for (auto i = std::size_t(0); eq && i < arg_types_.size(); ++i)
-				eq = eq && arg_types_[i] == b.arg_types_[i];
-			return eq;
-		}
+		bool operator==(const CKFunctionType& b) const;
 
-		virtual std::size_t hash() const
-		{
-			auto h = ret_type_->hash() ^ compute_hash(arg_types_.size(), variadic_);
-			for (auto&& a : arg_types_)
-				h ^= a->hash();
-			return h;
-		}
+		virtual std::size_t hash() const;
 		virtual CKIRTypeObs get_ir() const { return irt_; }
 		virtual CKIRFunctionTypeObs get_function_ir() const { return irt_; }
 		virtual bool is_function() const { return true; }
@@ -453,27 +397,8 @@ namespace cecko {
 		virtual CKTypeObs get_function_arg_type(std::size_t ix) const { return arg_types_[ix]; }
 		virtual std::size_t get_function_arg_count() const { return arg_types_.size(); }
 
-		virtual CITypeMangle mangle() const
-		{
-			auto m = (variadic_ ? "fv" : "f") + ret_type_->mangle();
-			for (auto&& a : arg_types_)
-				m += "_" + a->mangle();
-			return m;
-		}
-		virtual CIDecl declaration(bool is_const, const CIDecl& dtor) const {
-			CIDecl ad = "";
-			for (auto&& a : arg_types_)
-			{
-				if (!ad.empty()) ad += ",";
-				ad += a->declaration(false, "");
-			}
-			if (variadic_)
-			{
-				if (!ad.empty()) ad += ",";
-				ad += "...";
-			}
-			return ret_type_->declaration(false, decl_dtor(true, true, dtor) + "(" + ad + ")");
-		}
+		virtual CITypeMangle mangle() const;
+		virtual CIDecl declaration(bool is_const, const CIDecl& dtor) const;
 	private:
 		CKTypeObs ret_type_;
 		CKTypeObsArray arg_types_;
@@ -508,24 +433,7 @@ namespace cecko {
 		}
 		CKStructTypeObs find_struct_type(const CIName& n) { return strts_.find(n); }
 
-		void dump(CIOStream& os) const
-		{
-			/*
-			auto dlambda = [&os](auto&& a) {
-				os << "typedef " << a->declaration(false, a->mangle()) << ";" << CIEndl;
-			};
-			strts_.for_each(dlambda);
-			dlambda(&boot_);
-			dlambda(&chrt_);
-			dlambda(&intt_);
-			ptrts_.for_each(dlambda);
-			arrts_.for_each(dlambda);
-			fncts_.for_each(dlambda);
-			*/
-			strts_.for_each([&os](auto&& a) {
-				a->dump(os);
-				});
-		}
+		void dump(CIOStream& os) const;
 	private:
 		CKVoidType voit_;
 		CKBoolType boot_;
@@ -627,63 +535,21 @@ namespace cecko {
 	};
 
 	using CKFunctionObs = CKFunction*;
+	using CKFunctionConstObs = const CKFunction*;
 
 	class CKGlobalTable : public CKAbstractScope {
 	public:
 		CKGlobalTable()
 		{}
-		CKGlobalVarObs varDefine(CKIRModuleObs M, const std::string& name, const CKTypeRefPack& type_pack)
-		{
-			auto irtp = type_pack.type->get_ir();
-			auto var = CKCreateGlobalVariable(irtp, name, M);
-			return vars_.try_emplace(name, type_pack, var);
-		}
-		CKGlobalVarObs declare_extern_variable(CKIRModuleObs M, const std::string& name, const CKTypeRefPack& type_pack)
-		{
-			auto irtp = type_pack.type->get_ir();
-			auto var = CKCreateExternVariable(irtp, name, M);
-			return vars_.try_emplace(name, type_pack, var);
-		}
-		CKFunctionObs declare_function(const CIName& n, CKIRModuleObs M, CKFunctionTypeObs type)
-		{
-			return fncs_.try_emplace(n, M, type, n);
-		}
-		CKFunctionObs declare_function(const CIName& n, CKIRModuleObs M, CKFunctionTypeObs type, const std::string& irname)
-		{
-			return fncs_.try_emplace(n, M, type, irname);
-		}
-		CKFunctionObs find_function(const CIName& n)
-		{
-			auto p = fncs_.find(n);
-			return p;
-		}
-		virtual CKNamedObs find(const CIName& n)
-		{
-			auto q = vars_.find(n);
-			if (!!q)
-				return q;
-			auto p = fncs_.find(n);
-			return p;
-		}
+		CKGlobalVarObs varDefine(CKIRModuleObs M, const std::string& name, const CKTypeRefPack& type_pack);
+		CKGlobalVarObs declare_extern_variable(CKIRModuleObs M, const std::string& name, const CKTypeRefPack& type_pack);
+		CKFunctionObs declare_function(const CIName& n, CKIRModuleObs M, CKFunctionTypeObs type);
+		CKFunctionObs declare_function(const CIName& n, CKIRModuleObs M, CKFunctionTypeObs type, const std::string& irname);
+		CKFunctionObs find_function(const CIName& n);
+		CKFunctionConstObs find_function(const CIName& n) const;
+		virtual CKNamedObs find(const CIName& n);
 
-		void dump(CIOStream& os) const
-		{
-			auto decllambda = [&os](auto&& a) {
-				os << a->get_type()->declaration(false, a->get_name()) << ";" << CIEndl;
-			};
-			fncs_.for_each(decllambda);
-			auto varlambda = [&os](auto&& a) {
-				os << a->get_type()->declaration(false, a->get_name()) << ";" << CIEndl;
-			};
-			vars_.for_each(varlambda);
-			auto deflambda = [&os](auto&& a) {
-				if (a->is_defined())
-				{
-					a->dump(os);
-				}
-			};
-			fncs_.for_each(deflambda);
-		}
+		void dump(CIOStream& os) const;
 	private:
 		CINamedStorage< CKFunction> fncs_;
 		CINamedStorage< CKGlobalVar> vars_;
@@ -710,57 +576,13 @@ namespace cecko {
 			: parent_scope_(parent), function_(nullptr)
 		{}
 
-		void varsFromArgs(CKIRBuilderRef builder, CKFunctionObs f, const CKFunctionFormalPackArray& formal_packs)
-		{
-			function_ = f;
-			auto f_type = f->get_function_type();
-			auto f_ir = f->get_function_ir();
-			auto n = f_type->get_function_arg_count();
-			assert(n == formal_packs.size());
-			assert(n == f_ir->getFunctionType()->getNumParams());
-			for (std::size_t ix = 0; ix < n; ++ix)
-			{
-				auto&& arg_pack = formal_packs[ix];
-				if (!!arg_pack.name)	// unnamed arguments are not accessible inside the function
-				{
-					auto arg_type = f_type->get_function_arg_type(ix);
-					auto arg_ir = f_ir->args().begin() + ix;
-					auto var = builder.CreateAlloca(arg_type->get_ir(), nullptr, *arg_pack.name);
-					builder.CreateStore(arg_ir, var);
-					vars_.try_emplace(*arg_pack.name, CKTypeRefPack{ arg_type, arg_pack.is_const }, var, true);
-				}
-			}
-		}
+		void varsFromArgs(CKIRBuilderRef builder, CKFunctionObs f, const CKFunctionFormalPackArray& formal_packs);
 
-		CKLocalVarObs varDefine(CKIRBuilderRef builder, const std::string& name, const CKTypeRefPack& type_pack)
-		{
-			auto var = builder.CreateAlloca(type_pack.type->get_ir(), nullptr, name);
-			return vars_.try_emplace(name, type_pack, var, false);
-		}
+		CKLocalVarObs varDefine(CKIRBuilderRef builder, const std::string& name, const CKTypeRefPack& type_pack);
 
-		virtual CKNamedObs find(const CIName& n)
-		{
-			auto p = vars_.find(n);
-			if (p)
-				return p;
-			return parent_scope_->find(n);
-		}
-		/*
-		CKLocalVarObs find(const CIName& n)
-		{
-			return vars_.find(n);
-		}
-		*/
-		void dump(CIOStream& os) const
-		{
-			auto dlambda = [&os](auto&& a) {
-				if (!a->is_arg())
-				{
-					a->dump(os);
-				}
-			};
-			vars_.for_each(dlambda);
-		}
+		virtual CKNamedObs find(const CIName& n);
+
+		void dump(CIOStream& os) const;
 
 	private:
 		CKAbstractScopeObs parent_scope_;
@@ -768,56 +590,14 @@ namespace cecko {
 		CINamedStorage< CKLocalVar> vars_;
 	};
 
-	inline CKLocalTableObs CKFunction::define(CKAbstractScopeObs parent, CKIRBuilderRef builder, CKFunctionFormalPackArray formal_packs)
-	{
-		assert(!loctab_);
-		loctab_ = std::make_unique<CKLocalTable>(parent);
-		formal_packs_ = std::move(formal_packs);
-		loctab_->varsFromArgs(builder, this, formal_packs_);
-		return &*loctab_;
-	}
-
-	inline void CKFunction::dump(CIOStream& os) const
-	{
-		auto f_type = get_function_type();
-		std::string args;
-		{
-			auto n = f_type->get_function_arg_count();
-			for (std::size_t ix = 0; ix < n; ++ix)
-			{
-				auto arg_type = f_type->get_function_arg_type(ix);
-				auto&& arg_pack = get_formal_pack(ix);
-				if (!args.empty())
-					args += ",";
-				args += arg_type->declaration(arg_pack.is_const, !!arg_pack.name ? *arg_pack.name : std::string{});
-			}
-		}
-		os << f_type->get_function_return_type()->declaration(false, get_name() + "(" + args + ")") << "{" << CIEndl;
-
-		loctab_->dump(os);
-
-		os << "}" << CIEndl;
-	}
-
-	inline void CKVar::dump(CIOStream& os) const
-	{
-		os << "\t" << get_type_pack().type->declaration(get_type_pack().is_const, get_name()) << ";" << CIEndl;
-	}
-
 	// CONTEXT
 
 	using CKTypeTableObs = CKTypeTable*;
 	using CKGlobalTableObs = CKGlobalTable*;
+	using CKGlobalTableConstObs = const CKGlobalTable*;
 
 	struct CKTables {
-		CKTables(CKIREnvironmentObs irenv)
-			: irenv_(irenv),
-			typetable_(irenv->context()),
-			globtable_(),
-			module_(irenv->module())
-		{
-			declare_library();
-		}
+		CKTables(CKIREnvironmentObs irenv);
 
 		CKIRModuleObs module() const
 		{
@@ -834,21 +614,16 @@ namespace cecko {
 			return &globtable_;
 		}
 
-		void dump_tables(std::ostream& os) const
+		CKGlobalTableConstObs globtable() const
 		{
-			typetable_.dump(os);
-			globtable_.dump(os);
+			return &globtable_;
 		}
 
-		void dump_ir_module(std::ostream& os) const
-		{
-			irenv_->dump_module(os, module_);
-		}
+		void dump_tables(std::ostream& os) const;
 
-		std::error_code write_bitcode_module(const std::string& fname) const
-		{
-			return irenv_->write_bitcode_module(fname, module_);
-		}
+		void dump_ir_module(std::ostream& os) const;
+
+		std::error_code write_bitcode_module(const std::string& fname) const;
 
 	private:
 		void declare_library();
@@ -863,30 +638,10 @@ namespace cecko {
 	using CKTablesObs = CKTables*;
 
 	struct CKContext {
-		CKContext(CKTablesObs tab)
-			: typetable_(tab->typetable()),
-			globtable_(tab->globtable()),
-			loctable_(nullptr),
-			module_(tab->module()),
-			builder_(tab->module()->getContext())
-		{
-		}
+		CKContext(CKTablesObs tab);
 
-		void enter_function(CKFunctionObs f, CKFunctionFormalPackArray pack)
-		{
-			assert(!loctable_);
-			// FUNCTION PROLOG
-			auto BB = CKCreateBasicBlock("prolog", f->get_function_ir());
-			builder_.SetInsertPoint(BB);
-			loctable_ = f->define(globtable_, builder_, std::move(pack));
-		}
-
-		void exit_function()
-		{
-			assert(loctable_);
-			loctable_ = nullptr;
-			builder_.ClearInsertionPoint();
-		}
+		void enter_function(CKFunctionObs f, CKFunctionFormalPackArray pack);
+		void exit_function();
 
 		CKVoidTypeObs get_void_type() const { return typetable_->get_void_type(); }
 		CKBoolTypeObs get_bool_type() const { return typetable_->get_bool_type(); }
@@ -897,32 +652,12 @@ namespace cecko {
 		CKFunctionTypeObs get_function_type(CKTypeObs ret_type, CKTypeObsArray arg_types, bool variadic = false) { return typetable_->get_function_type(ret_type, std::move(arg_types), variadic); }
 		CKStructTypeObs declare_struct_type(const CIName& n) { return typetable_->declare_struct_type(n, module_->getContext()); }
 		CKStructTypeObs find_struct_type(const CIName& n) { return typetable_->find_struct_type(n); }
-		CKVarObs define_var(const std::string& name, const CKTypeRefPack& type_pack)
-		{
-			if (!!loctable_)
-			{
-				return loctable_->varDefine(builder_, name, type_pack);
-			}
-			else
-			{
-				return globtable_->varDefine(module_, name, type_pack);
-			}
-		}
+		CKVarObs define_var(const std::string& name, const CKTypeRefPack& type_pack);
 		CKFunctionObs declare_function(const CIName& n, CKFunctionTypeObs type)
 		{
 			return globtable_->declare_function(n, module_, type);
 		}
-		CKNamedObs find(const CIName& n)
-		{
-			if (!!loctable_)
-			{
-				return loctable_->find(n);
-			}
-			else
-			{
-				return globtable_->find(n);
-			}
-		}
+		CKNamedObs find(const CIName& n);
 
 		CKIRConstantIntObs get_int32_constant(std::int_fast32_t v)
 		{
@@ -953,5 +688,6 @@ inline std::size_t std::hash<cecko::CKTypeRefPack>::operator()(const cecko::CKTy
 {
 	return cecko::compute_hash(a.type, a.is_const);
 }
+
 
 #endif
