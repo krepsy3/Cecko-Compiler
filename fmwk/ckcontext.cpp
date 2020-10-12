@@ -11,31 +11,31 @@ context for the compiler
 #include <sstream>
 #include <iomanip>
 
-namespace {
-
-	std::array<const char *,2> err_s_msg[] = {
-		{ "Syntax error: ", "" },
-		{ "Unknown character '", "'" },
-		{ "Unable to open input file \"", "\"" },
-		{ "Undefined identifier \"", "\"" },
-	};
-	/*
-	std::array<const char *,2> err_i_msg[] = {
-	};
-	*/
-	const char* err_n_msg[] = {
-		"INTERNAL ERROR",
-		"expression is void",
-		"array expression is not an lvalue",
-		"name does not denote a value",
-		"expression is not a number",
-		"expression is not a pointer",
-		"expression is not a number or pointer",
-		"Incompatible operand(s)",
-	};
-}
-
 namespace cecko {
+
+	namespace errors {
+
+		err_def_s SYNTAX{ "Syntax error: ", "" };
+		err_def_s INTOUTRANGE{ "Integer literal \"", "\" out of range" };
+		err_def_s BADINT{ "Malformed integer literal \"", "\"" };
+		err_def_s BADESCAPE{ "Malformed escape sequence \"", "\"" };
+		err_def_s UNCHAR{ "Unknown character '", "'" };
+		err_def_s NOFILE{ "Unable to open input file \"", "\"" };
+		err_def_s UNDEF_IDF{ "Undefined identifier \"", "\"" };
+
+		err_def_n INTERNAL{ "INTERNAL ERROR" };
+		err_def_n EOLINSTRCHR{ "End of line in string or character literal" };
+		err_def_n EOFINSTRCHR{ "End of file in string or character literal" };
+		err_def_n EOFINCMT{ "End of file in comment" };
+		err_def_n UNEXPENDCMT{ "End of comment outside comment" };
+		err_def_n VOIDEXPR{ "expression is void" };
+		err_def_n ARRAY_NOT_LVALUE{ "array expression is not an lvalue"};
+		err_def_n NAME_NOT_VALUE{ "name does not denote a value" };
+		err_def_n NOT_NUMBER{ "expression is not a number" };
+		err_def_n NOT_POINTER{ "expression is not a pointer" };
+		err_def_n NOT_NUMBER_OR_POINTER{ "expression is not a number or pointer" };
+		err_def_n INCOMPATIBLE{ "Incompatible operand(s)" };
+	}
 
 	std::string context::escape(std::string_view s)
 	{
@@ -52,24 +52,13 @@ namespace cecko {
 
 	void context::message(errors::err_s err, loc_t loc, std::string_view msg)
 	{
-		/*
-		fprintf(stdout, "Error (line %d): ", loc);
-		fprintf(stdout, err_s_msg[err], msg.data());
-		fputc('\n', stdout);
-		*/
-		auto&& e = err_s_msg[err];
+		errors::err_def_s& e = err;
 		std::cout << "Error (line " << loc << "): " << e[0] << escape(msg) << e[1] << std::endl;
 	}
-	/*
-	void context::message(errors::err_i err, loc_t loc, int i)
-	{
-		auto&& e = err_i_msg[err];
-		std::cout << "Error (line " << loc << "): " << e[0] << i << e[1] << std::endl;
-	}
-	*/
+
 	void context::message(errors::err_n err, loc_t loc)
 	{
-		auto&& e = err_n_msg[err];
-		std::cout << "Error (line " << loc << "): " << e << std::endl;
+		errors::err_def_n & e = err;
+		std::cout << "Error (line " << loc << "): " << e[0] << std::endl;
 	}
 }
