@@ -18,7 +18,7 @@ keyword: one of
 	char
 	int
 	return
-???	sizeof
+	sizeof
 	struct
 	typedef
 	void
@@ -163,8 +163,7 @@ unary-expression:
 	++ unary-expression
 	-- unary-expression
 	unary-operator cast-expression
-???	sizeof unary-expression
-???	sizeof ( type-name )
+	sizeof ( type-name )
 
 unary-operator: one of
 	& * + - !
