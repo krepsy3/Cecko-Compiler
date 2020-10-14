@@ -85,7 +85,7 @@ enumeration-constant:
 
 ```
 character-constant:
-	’ c-char-sequence ’
+	' c-char-sequence '
 
 c-char-sequence:
 	c-char
@@ -93,7 +93,7 @@ c-char-sequence:
 
 c-char:
 	any member of the source character set except
-	the single-quote ’, backslash \, or new-line character
+	the single-quote ', backslash \, or new-line character
 	escape-sequence
 
 escape-sequence:
@@ -101,7 +101,7 @@ escape-sequence:
 	hexadecimal-escape-sequence
 
 simple-escape-sequence: one of
-	\’ \" \? \\
+	\' \" \? \\
 	\a \b \f \n \r \t \v
 
 hexadecimal-escape-sequence:
