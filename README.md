@@ -4,7 +4,11 @@ The skeleton of Cecko.
 
 ## Getting Started
 
-* [Prerequisities](doc/Prerequisities.md)
-* [Creating your Cecko repository](doc/Repository.md)
-* [Building Cecko](doc/Building.md)
-* [Running and debugging Cecko](doc/Runnning.md)
+* [Prerequisities](https://www.ksi.mff.cuni.cz/teaching/nswi098-web/index.html#@tab_prerequisites)
+* [Creating your Cecko repository](https://www.ksi.mff.cuni.cz/teaching/nswi098-web/index.html#@tab_repository)
+* [Building and running Cecko](https://www.ksi.mff.cuni.cz/teaching/nswi098-web/index.html#@tab_building_and_running)
+
+## [The assignments](https://www.ksi.mff.cuni.cz/teaching/nswi098-web/index.html#@tab_assignments)
+
+* [The Cecko grammar](doc/selected-grammar.md)
+
