@@ -23,7 +23,6 @@ keyword: one of
 	typedef
 	void
 	while
-	string
 	_Bool
 ```
 
