@@ -88,6 +88,7 @@ character-constant:
 
 c-char-sequence:
 	c-char
+	c-char-sequence c-char
 
 c-char:
 	any member of the source character set except
