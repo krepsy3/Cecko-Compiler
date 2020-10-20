@@ -34,7 +34,6 @@ extern "C" {
 		va_start(va, s);
 		int rv = vscanf(s, va);
 		va_end(va);
-		fflush(stdout);
 		return rv;
 	}
 
@@ -44,7 +43,6 @@ extern "C" {
 		va_start(va, s);
 		int rv = vsprintf(b, s, va);
 		va_end(va);
-		fflush(stdout);
 		return rv;
 	}
 
@@ -54,7 +52,6 @@ extern "C" {
 		va_start(va, s);
 		int rv = vsscanf(b, s, va);
 		va_end(va);
-		fflush(stdout);
 		return rv;
 	}
 
