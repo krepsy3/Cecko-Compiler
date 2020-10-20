@@ -1,3 +1,5 @@
+// fibbonacci
+
 int fib(int p);
 
 struct Str {
@@ -150,3 +152,11 @@ int main(int argc, char** argv)
 	}
 	return 0;
 }
+
+// /* this should not start multi-line comment
+
+/*
+/* 
+testing nesting 
+*/
+*/
