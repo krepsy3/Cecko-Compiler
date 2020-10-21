@@ -125,10 +125,8 @@ namespace cecko {
 		return oec;
 	}
 
-	int CKIREnvironment::run_main(CKIRFunctionObs fnc, int argc, char** argv)
+	int CKIREnvironment::run_main(CKIRFunctionObs fnc, int argc, char** argv, std::ostream & os)
 	{
-		//auto&& os = llvm::outs();
-		auto&& os = std::cout;
 		int mainrv = -1;
 		{
 			// Now we going to create JIT

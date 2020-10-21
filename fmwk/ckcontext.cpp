@@ -54,12 +54,12 @@ namespace cecko {
 	void context::message(errors::err_s err, loc_t loc, std::string_view msg)
 	{
 		errors::err_def_s& e = err;
-		std::cout << "Error (line " << loc << "): " << e[0] << escape(msg) << e[1] << std::endl;
+		out() << "Error (line " << loc << "): " << e[0] << escape(msg) << e[1] << std::endl;
 	}
 
 	void context::message(errors::err_n err, loc_t loc)
 	{
 		errors::err_def_n & e = err;
-		std::cout << "Error (line " << loc << "): " << e[0] << std::endl;
+		out() << "Error (line " << loc << "): " << e[0] << std::endl;
 	}
 }

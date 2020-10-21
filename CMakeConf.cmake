@@ -33,6 +33,14 @@ function(SET_TARGET_OPTIONS TARGET OPT_GCC OPT_MSVC)
 	endif()
 endfunction()
 
+function(SET_TARGET_LINK_OPTIONS TARGET OPT_GCC OPT_MSVC)
+	if(MSVC)
+		target_link_options(${TARGET} PUBLIC ${OPT_MSVC})
+	else()
+		target_link_options(${TARGET} PUBLIC ${OPT_GCC})
+	endif()
+endfunction()
+
 function(COMMON_OPTIONS TARGET)
 	set_property(TARGET ${TARGET} PROPERTY CXX_STANDARD 17)
 	if(NOT DEFINED LLVM_PACKAGE_VERSION)
@@ -50,10 +58,9 @@ function(COMMON_OPTIONS TARGET)
 	SET_TARGET_OPTIONS(${TARGET} "" "/wd4267")
 	SET_TARGET_OPTIONS(${TARGET} "" "/wd4624")
 
-	if(MSVC)
-	else()
-		target_link_options(${TARGET} PUBLIC "-rdynamic")	# for self-references to ckrt_printf etc
-	endif()
+	SET_TARGET_LINK_OPTIONS(${TARGET} "" "/IGNORE:4099")	# missing pdb
+
+	SET_TARGET_LINK_OPTIONS(${TARGET} "-rdynamic" "")	# for self-references to ckrt_printf etc
 
 endfunction()
 

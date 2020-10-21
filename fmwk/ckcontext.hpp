@@ -14,6 +14,7 @@ context for the compiler
 #include <string_view>
 #include <functional>
 #include <array>
+#include <ostream>
 
 namespace cecko {
 
@@ -70,7 +71,9 @@ namespace cecko {
 
 	class context : public CKContext {
 	public:
-		context(CKTablesObs tables) : CKContext(tables), line_(1) {}
+		context(CKTablesObs tables, std::ostream* outp) : CKContext(tables), line_(1), outp_(outp) {}
+
+		std::ostream& out() { return *outp_; }
 
 		void message(errors::err_s err, loc_t loc, std::string_view msg);
 		void message(errors::err_n err, loc_t loc);
@@ -81,6 +84,8 @@ namespace cecko {
 		loc_t incline() { return line_++; }		// returns line value before increment
 	private:
 		loc_t	line_;
+
+		std::ostream * outp_;
 	};
 
 	using context_obs = context*;
