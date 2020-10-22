@@ -20,7 +20,7 @@ Error (line 5): End of line in string or character literal
 6: *
 6: identifier [b]
 6: =
-Error (line 6): Malformed escape sequence "abce"
+Error (line 6): Malformed escape sequence "\xabce"
 6: string literal "Too long hex \xcescape"
 6: ;
 7: ETYPE char

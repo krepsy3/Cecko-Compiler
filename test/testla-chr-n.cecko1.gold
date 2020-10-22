@@ -35,14 +35,14 @@ Error (line 10): Malformed escape sequence "\q"
 11: ETYPE char
 11: identifier [e]
 11: =
-Error (line 11): Malformed escape sequence "1234"
+Error (line 11): Malformed escape sequence "\x1234"
 11: integer literal 52
 11: ;
 12: ETYPE char
 12: identifier [f]
 12: =
 Error (line 12): Malformed escape sequence "\x"
-12: integer literal 0
+12: integer literal 120
 12: ;
 14: ETYPE char
 14: identifier [g]
