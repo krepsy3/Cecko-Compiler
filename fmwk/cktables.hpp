@@ -138,9 +138,20 @@ namespace cecko {
 		template<typename F>
 		void for_each(F&& f) const
 		{
-			for (auto&& a : data_)
+			using container_pair_obs = const std::pair< const CIName, T>*;
+			auto pair_less = [](auto a, auto b) { 
+				return a->first < b->first; 
+			};
+			using ordering_set = std::vector< container_pair_obs>;
+			ordering_set os(data_.size(), nullptr);
+			std::transform(data_.begin(), data_.end(), os.begin(),
+				[](auto&& a) { 
+				return &a; 
+				});
+			std::sort(os.begin(), os.end(), pair_less);
+			for (auto&& p : os)
 			{
-				f(&a.second);
+				f(&p->second);
 			}
 		}
 	private:

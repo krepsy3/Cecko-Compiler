@@ -66,7 +66,9 @@ namespace cecko {
 
 	class main_state_code : public main_state_parser {
 	public:
-		std::string oname;
+		std::string oname;	// binary output
+		std::string aname;	// assembly output
+		bool a_to_out = true;	// assembly to out()
 		int app_argc = 0;
 		char** app_argv = nullptr;
 

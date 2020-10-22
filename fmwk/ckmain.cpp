@@ -129,10 +129,11 @@ namespace cecko {
 		auto arg_reader = [this](char opt, auto&& get_val) -> bool {
 			switch (opt)
 			{
-			case 'o':
-				if (!oname.empty())
+			case 'a':
+				if (!aname.empty())
 					return false;
-				oname = get_val();
+				aname = get_val();
+				a_to_out = false;
 				return true;
 			case 'c':
 				if (!covname.empty())
@@ -143,6 +144,14 @@ namespace cecko {
 				if (!covlinename.empty())
 					return false;
 				covlinename = get_val();
+				return true;
+			case 'n':
+				a_to_out = false;
+				return true;
+			case 'o':
+				if (!oname.empty())
+					return false;
+				oname = get_val();
 				return true;
 			case 'z':
 				if (!!outp_owner_)
@@ -156,6 +165,7 @@ namespace cecko {
 						return false;
 					}
 					outp_ = &*outp_owner_;
+					a_to_out = false;
 				}
 				return true;
 			default:
@@ -168,8 +178,9 @@ namespace cecko {
 
 	bool main_state_code::dump_code() const
 	{
-		out() << "========== IR module ==========" << std::endl;
+		if (a_to_out)
 		{
+			out() << "========== IR module ==========" << std::endl;
 			std::stringstream oss;
 			the_tables.dump_ir_module(oss);
 			for (;;)
@@ -179,6 +190,19 @@ namespace cecko {
 				if (!rc)
 					break;
 				out() << "::: " << lbuf << std::endl;
+			}
+		}
+
+		if (!aname.empty())
+		{
+			std::ofstream af(aname);
+			if (!af.good())
+			{
+				std::cout << "Cannot open output file \"" << aname << "\"" << std::endl;
+			}
+			else
+			{
+				the_tables.dump_ir_module(af);
 			}
 		}
 

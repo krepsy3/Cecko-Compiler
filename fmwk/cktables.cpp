@@ -19,7 +19,7 @@ namespace cecko {
 
 	CIDecl CKVoidType::declaration(bool is_const, const CIDecl& dtor) const { return decl_const(is_const) + "void" + decl_dtor(false, false, dtor); }
 
-	CIDecl CKBoolType::declaration(bool is_const, const CIDecl& dtor) const { return decl_const(is_const) + "bool" + decl_dtor(false, false, dtor); }
+	CIDecl CKBoolType::declaration(bool is_const, const CIDecl& dtor) const { return decl_const(is_const) + "_Bool" + decl_dtor(false, false, dtor); }
 
 	CIDecl CKCharType::declaration(bool is_const, const CIDecl& dtor) const { return decl_const(is_const) + "char" + decl_dtor(false, false, dtor); }
 
