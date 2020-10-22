@@ -69,49 +69,88 @@ namespace cecko {
 		extern err_def_n INCOMPATIBLE;
 	}
 
-	struct coverage_counter {
-	public:
-		coverage_counter()
-			: num(0)
-		{}
+	namespace coverage {
 
-		void inc()
-		{
-			++num;
-		}
+		struct coverage_counter {
+		public:
+			coverage_counter()
+				: num(0)
+			{}
 
-		int get() const
-		{
-			return num;
-		}
-	private:
-		int num;
-	};
-
-	struct coverage_data {
-	public:
-		void inc(std::string n)
-		{
-			auto rv = map_.try_emplace(std::move(n));
-			rv.first->second.inc();
-		}
-
-		template< typename F>
-		void for_each(F&& f) const
-		{
-			for (auto&& a : map_)
+			void inc()
 			{
-				f(a.first, a.second);
+				++num;
 			}
-		}
-	private:
+
+			int get() const
+			{
+				return num;
+			}
+		private:
+			int num;
+		};
+
 		using map_t = std::map<std::string, coverage_counter>;
-		map_t map_;
-	};
+		using map_element_t = std::pair<const std::string, coverage_counter>;
+		using map_element_obs = const map_element_t*;
+
+		struct line_coverage_data {
+		public:
+			void push(map_element_obs p)
+			{
+				v_.push_back(p);
+			}
+
+			template< typename F>
+			void for_each(F && f) const
+			{
+				for (auto&& a : v_)
+				{
+					f(a->first);
+				}
+			}
+		private:
+			std::vector< map_element_obs> v_;
+		};
+
+		using line_map_t = std::map<loc_t, line_coverage_data>;
+
+		struct coverage_data {
+		public:
+			void inc(loc_t line, std::string n)
+			{
+				auto rv = map_.try_emplace(std::move(n));
+				rv.first->second.inc();
+				auto rvl = line_map_.try_emplace(line);
+				rvl.first->second.push(&*rv.first);
+			}
+
+			template< typename F>
+			void for_each(F&& f) const
+			{
+				for (auto&& a : map_)
+				{
+					f(a.first, a.second);
+				}
+			}
+
+			template< typename F>
+			void for_each_line(F&& f) const
+			{
+				for (auto&& a : line_map_)
+				{
+					f(a.first, a.second);
+				}
+			}
+		private:
+			map_t map_;
+			line_map_t line_map_;
+		};
+	}
 
 	class context : public CKContext {
 	public:
-		context(CKTablesObs tables, std::ostream* outp, coverage_data * cd) : CKContext(tables), line_(1), outp_(outp), cd_(cd) {}
+		context(CKTablesObs tables, std::ostream* outp, coverage::coverage_data * cd) : CKContext(tables), line_(1), outp_(outp), cd_(cd) {}
 
 		std::ostream& out() { return *outp_; }
 
@@ -125,7 +164,7 @@ namespace cecko {
 
 		void cov(std::string n)
 		{
-			cd_->inc(std::move(n));
+			cd_->inc(line(), std::move(n));
 		}
 
 	private:
@@ -133,7 +172,7 @@ namespace cecko {
 
 		std::ostream * outp_;
 
-		coverage_data * cd_;
+		coverage::coverage_data * cd_;
 	};
 
 	using context_obs = context*;

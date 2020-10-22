@@ -26,6 +26,7 @@ namespace cecko {
 	public:
 		std::string input_fname;
 		std::string covname;
+		std::string covlinename;
 
 		main_state_parser() : outp_(&std::cout) {}
 
@@ -60,7 +61,7 @@ namespace cecko {
 		std::ostream* outp_;
 		std::unique_ptr< std::ofstream> outp_owner_;
 
-		coverage_data cd_;
+		coverage::coverage_data cd_;
 	};
 
 	class main_state_code : public main_state_parser {

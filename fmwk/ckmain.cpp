@@ -74,6 +74,44 @@ namespace cecko {
 				covf << std::setw(5) << cc.get() << "\t" << name << std::endl;
 				});
 		}
+		if (!covlinename.empty())
+		{
+			std::ofstream covf(covlinename);
+			std::ifstream inf(input_fname);
+			loc_t infline = 0;
+			cd_.for_each_line([&covf, &inf, &infline](auto&& line, auto&& lcd) {
+				for (;;)
+				{
+					std::string ins;
+					std::getline(inf, ins);
+					++infline;
+					//covf << std::setw(5) << infline << "\t";
+					covf << ins;
+					if (infline >= line)
+					{
+						std::string delim = "\t//# ";
+						lcd.for_each([&covf, &delim](auto&& name) {
+							covf << delim << name;
+							delim = " ";
+							});
+						covf << std::endl;
+						break;
+					}
+					covf << std::endl;
+				}
+				});
+			for (;;)
+			{
+				std::string ins;
+				std::getline(inf, ins);
+				if (inf.fail())
+					break;
+				++infline;
+				//covf << std::setw(5) << infline << "\t";
+				covf << ins;
+				covf << std::endl;
+			}
+		}
 		return true;
 	}
 
@@ -100,6 +138,11 @@ namespace cecko {
 				if (!covname.empty())
 					return false;
 				covname = get_val();
+				return true;
+			case 'd':
+				if (!covlinename.empty())
+					return false;
+				covlinename = get_val();
 				return true;
 			case 'z':
 				if (!!outp_owner_)
