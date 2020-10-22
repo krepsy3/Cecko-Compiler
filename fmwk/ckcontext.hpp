@@ -69,9 +69,49 @@ namespace cecko {
 		extern err_def_n INCOMPATIBLE;
 	}
 
+	struct coverage_counter {
+	public:
+		coverage_counter()
+			: num(0)
+		{}
+
+		void inc()
+		{
+			++num;
+		}
+
+		int get() const
+		{
+			return num;
+		}
+	private:
+		int num;
+	};
+
+	struct coverage_data {
+	public:
+		void inc(std::string n)
+		{
+			auto rv = map_.try_emplace(std::move(n));
+			rv.first->second.inc();
+		}
+
+		template< typename F>
+		void for_each(F&& f) const
+		{
+			for (auto&& a : map_)
+			{
+				f(a.first, a.second);
+			}
+		}
+	private:
+		using map_t = std::map<std::string, coverage_counter>;
+		map_t map_;
+	};
+
 	class context : public CKContext {
 	public:
-		context(CKTablesObs tables, std::ostream* outp) : CKContext(tables), line_(1), outp_(outp) {}
+		context(CKTablesObs tables, std::ostream* outp, coverage_data * cd) : CKContext(tables), line_(1), outp_(outp), cd_(cd) {}
 
 		std::ostream& out() { return *outp_; }
 
@@ -82,10 +122,18 @@ namespace cecko {
 
 		loc_t line() const { return line_; }
 		loc_t incline() { return line_++; }		// returns line value before increment
+
+		void cov(std::string n)
+		{
+			cd_->inc(std::move(n));
+		}
+
 	private:
 		loc_t	line_;
 
 		std::ostream * outp_;
+
+		coverage_data * cd_;
 	};
 
 	using context_obs = context*;

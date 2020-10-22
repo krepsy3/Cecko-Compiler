@@ -1,5 +1,8 @@
 #include "ckmain.hpp"
 
+#include <iomanip>
+#include <iostream>
+
 namespace cecko {
 
 	template< typename AR>
@@ -63,6 +66,23 @@ namespace cecko {
 	{
 		out() << "========== tables ==========" << std::endl;
 		the_tables.dump_tables(out());
+
+		if (!covname.empty())
+		{
+			std::ofstream covf(covname);
+			cd_.for_each([&covf](auto&& name, auto&& cc) {
+				covf << std::setw(5) << cc.get() << "\t" << name << std::endl;
+				});
+		}
+		return true;
+	}
+
+	bool main_state_parser::dump_coverage() const
+	{
+		out() << "========== coverage ==========" << std::endl;
+		cd_.for_each([this](auto&& name, auto&& cc) {
+			out() << "#" << std::setw(5) << cc.get() << " " << name << std::endl;
+			});
 		return true;
 	}
 
@@ -75,6 +95,11 @@ namespace cecko {
 				if (!oname.empty())
 					return false;
 				oname = get_val();
+				return true;
+			case 'c':
+				if (!covname.empty())
+					return false;
+				covname = get_val();
 				return true;
 			case 'z':
 				if (!!outp_owner_)

@@ -25,13 +25,14 @@ namespace cecko {
 	class main_state_parser : public main_state_lexer {
 	public:
 		std::string input_fname;
+		std::string covname;
 
 		main_state_parser() : outp_(&std::cout) {}
 
 		template< class the_parser>
 		bool parse()
 		{
-			context ctx(&the_tables, &out());
+			context ctx(&the_tables, &out(), &cd_);
 
 			FILE* iff = fopen(input_fname.c_str(), "r");
 			if (iff == nullptr)
@@ -52,10 +53,14 @@ namespace cecko {
 
 		bool dump_tables() const;
 
+		bool dump_coverage() const;
+
 		std::ostream& out() const { return *outp_; }
 	protected:
 		std::ostream* outp_;
 		std::unique_ptr< std::ofstream> outp_owner_;
+
+		coverage_data cd_;
 	};
 
 	class main_state_code : public main_state_parser {
