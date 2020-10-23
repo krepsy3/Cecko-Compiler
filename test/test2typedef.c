@@ -2,6 +2,32 @@
 
 FILE* myout;
 
+typedef enum En ent;
+
+ent my_var;
+
+enum En {
+	ALPHA,
+	BETA = 729,
+	GAMMA
+};
+
+ent test_enum_internal(ent arg)
+{
+	ent tmp;
+	tmp = my_var;
+	my_var = arg;
+	return tmp;
+}
+
+void test_enum(void)
+{
+	ent x;
+	printf("... test_enum ...\n");
+	x = test_enum_internal(BETA);
+	printf("x=%d, my_var=%d\n", x, my_var);
+}
+
 int fib(int p);
 
 typedef struct Str* str_ptr;
@@ -146,6 +172,7 @@ int main(int argc, char** argv)
 	status = 0;
 	printf("This is test1.c main()\n");
 	argreverttest(argc, argv);
+	test_enum();
 	fibtest();
 	stringtest();
 	pointerarithmeticstest();
