@@ -759,7 +759,7 @@ namespace cecko {
 			return globtable_->declare_function(n, module_, type);
 		}
 		CKNamedObs find(const CIName& n);
-		CKTypedefConstObs CKContext::find_typedef(const CIName& n) const;
+		CKTypedefConstObs find_typedef(const CIName& n) const;
 
 		bool is_typedef(const CIName& n) const;
 
