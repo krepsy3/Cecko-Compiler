@@ -459,16 +459,34 @@ namespace cecko {
 	class CKAbstractNamed : public CINamePtr, CIImmovable {
 	public:
 		virtual ~CKAbstractNamed() {}
+		virtual bool is_typedef() const { return false; }
 		virtual bool is_var() const { return false; }
 		virtual bool is_function() const { return false; }
 		virtual bool is_const() const { return false; }
 		virtual CKTypeObs get_type() const = 0;
-		virtual CKIRValueObs get_ir() const = 0;
+		virtual CKIRValueObs get_ir() const { return nullptr; };
 		virtual CKIRFunctionObs get_function_ir() const { return nullptr; };
 		virtual void dump(CIOStream& os) const = 0;
 	};
 
 	using CKNamedObs = CKAbstractNamed*;
+
+	class CKTypedef : public CKAbstractNamed {
+	public:
+		CKTypedef(CKTypeRefPack type_pack)
+			: type_pack_(type_pack)
+		{}
+		virtual bool is_typedef() const { return true; }
+		virtual bool is_var() const { return false; }
+		virtual CKTypeObs get_type() const { return type_pack_.type; }
+		virtual bool is_const() const { return type_pack_.is_const; }
+		const CKTypeRefPack& get_type_pack() const { return type_pack_; }
+		virtual void dump(CIOStream& os) const;
+	private:
+		CKTypeRefPack type_pack_;
+	};
+
+	using CKTypedefConstObs = const CKTypedef*;
 
 	class CKVar : public CKAbstractNamed {
 	public:
@@ -517,6 +535,7 @@ namespace cecko {
 	class CKAbstractScope : CIImmovable {
 	public:
 		virtual ~CKAbstractScope() {}
+		virtual CKTypedefConstObs find_typedef(const CIName& n) const = 0;
 		virtual CKNamedObs find(const CIName& n) = 0;
 	};
 
@@ -552,16 +571,19 @@ namespace cecko {
 	public:
 		CKGlobalTable()
 		{}
+		CKTypedefConstObs declare_typedef(const CIName& name, const CKTypeRefPack& type_pack);
 		CKGlobalVarObs varDefine(CKIRModuleObs M, const std::string& name, const CKTypeRefPack& type_pack);
 		CKGlobalVarObs declare_extern_variable(CKIRModuleObs M, const std::string& name, const CKTypeRefPack& type_pack);
 		CKFunctionObs declare_function(const CIName& n, CKIRModuleObs M, CKFunctionTypeObs type);
 		CKFunctionObs declare_function(const CIName& n, CKIRModuleObs M, CKFunctionTypeObs type, const std::string& irname);
 		CKFunctionObs find_function(const CIName& n);
 		CKFunctionConstObs find_function(const CIName& n) const;
+		virtual CKTypedefConstObs find_typedef(const CIName& n) const;
 		virtual CKNamedObs find(const CIName& n);
 
 		void dump(CIOStream& os) const;
 	private:
+		CINamedStorage< CKTypedef> typedefs_;
 		CINamedStorage< CKFunction> fncs_;
 		CINamedStorage< CKGlobalVar> vars_;
 	};
@@ -589,8 +611,10 @@ namespace cecko {
 
 		void varsFromArgs(CKIRBuilderRef builder, CKFunctionObs f, const CKFunctionFormalPackArray& formal_packs);
 
+		CKTypedefConstObs declare_typedef(const CIName& name, const CKTypeRefPack& type_pack);
 		CKLocalVarObs varDefine(CKIRBuilderRef builder, const std::string& name, const CKTypeRefPack& type_pack);
 
+		virtual CKTypedefConstObs find_typedef(const CIName& n) const;
 		virtual CKNamedObs find(const CIName& n);
 
 		void dump(CIOStream& os) const;
@@ -598,6 +622,7 @@ namespace cecko {
 	private:
 		CKAbstractScopeObs parent_scope_;
 		CKFunctionObs function_;
+		CINamedStorage< CKTypedef> typedefs_;
 		CINamedStorage< CKLocalVar> vars_;
 	};
 
@@ -670,11 +695,15 @@ namespace cecko {
 		CKStructTypeObs declare_struct_type(const CIName& n) { return typetable_->declare_struct_type(n, module_->getContext()); }
 		CKStructTypeObs find_struct_type(const CIName& n) { return typetable_->find_struct_type(n); }
 		CKVarObs define_var(const std::string& name, const CKTypeRefPack& type_pack);
+		CKTypedefConstObs define_typedef(const std::string& name, const CKTypeRefPack& type_pack);
 		CKFunctionObs declare_function(const CIName& n, CKFunctionTypeObs type)
 		{
 			return globtable_->declare_function(n, module_, type);
 		}
 		CKNamedObs find(const CIName& n);
+		CKTypedefConstObs CKContext::find_typedef(const CIName& n) const;
+
+		bool is_typedef(const CIName& n) const;
 
 		CKIRConstantIntObs get_int32_constant(std::int_fast32_t v)
 		{
