@@ -58,6 +58,35 @@ namespace cecko {
 		}
 	}
 
+	CIDecl CKEnumType::declaration(bool is_const, const CIDecl& dtor) const { return decl_const(is_const) + "enum " + get_name() + decl_dtor(false, false, dtor); }
+
+	void CKEnumType::finalize(CKConstantObsVector items)
+	{
+		assert(!defined_);
+		elements_ordered_ = std::move(items);
+		defined_ = true;
+	}
+
+	void CKEnumType::dump(CIOStream& os) const
+	{
+		if (defined_)
+		{
+			os << "enum " << get_name();
+			std::string delim = "{";
+			for (auto&& a : elements_ordered_)
+			{
+				os << delim << CIEndl;
+				os << "\t" << a->declaration();
+				delim = ",";
+			}
+			if ( delim == "{" )
+				os << delim;
+			else
+				os << CIEndl;
+			os << "};" << CIEndl;
+		}
+	}
+
 	CKFunctionType::CKFunctionType(CKTypeObs ret_type, CKTypeObsArray arg_types, bool variadic)
 		: ret_type_(ret_type), arg_types_(std::move(arg_types)), variadic_(variadic), irt_(nullptr)
 	{
@@ -120,15 +149,28 @@ namespace cecko {
 		arrts_.for_each(dlambda);
 		fncts_.for_each(dlambda);
 		*/
+		os << "// --- ENUMS ---" << std::endl;
+		enmts_.for_each([&os](auto&& a) {
+			a->dump(os);
+			});
 		os << "// --- STRUCTS ---" << std::endl;
 		strts_.for_each([&os](auto&& a) {
 			a->dump(os);
 			});
 	}
 
+	std::string CKConstant::declaration() const 
+	{ 
+		return get_name() + "=" + std::to_string(value_->getValue().getZExtValue());
+	}
+
 	CKTypedefConstObs CKGlobalTable::declare_typedef(const std::string& name, const CKTypeRefPack& type_pack)
 	{
 		return typedefs_.try_emplace(name, type_pack);
+	}
+	CKConstantConstObs CKGlobalTable::declare_constant(const std::string& name, CKTypeObs type, CKIRConstantIntObs value)
+	{
+		return constants_.try_emplace(name, type, value);
 	}
 	CKGlobalVarObs CKGlobalTable::varDefine(CKIRModuleObs M, const std::string& name, const CKTypeRefPack& type_pack)
 	{
@@ -167,6 +209,9 @@ namespace cecko {
 	}
 	CKNamedObs CKGlobalTable::find(const CIName& n)
 	{
+		auto pc = constants_.find(n);
+		if (pc)
+			return pc;
 		auto q = vars_.find(n);
 		if (!!q)
 			return q;
@@ -227,6 +272,10 @@ namespace cecko {
 	{
 		return typedefs_.try_emplace(name, type_pack);
 	}
+	CKConstantConstObs CKLocalTable::declare_constant(const std::string& name, CKTypeObs type, CKIRConstantIntObs value)
+	{
+		return constants_.try_emplace(name, type, value);
+	}
 	CKLocalVarObs CKLocalTable::varDefine(CKIRBuilderRef builder, const std::string& name, const CKTypeRefPack& type_pack)
 	{
 		auto var = builder.CreateAlloca(type_pack.type->get_ir(), nullptr, name);
@@ -242,9 +291,12 @@ namespace cecko {
 	}
 	CKNamedObs CKLocalTable::find(const CIName& n)
 	{
-		auto p = vars_.find(n);
-		if (p)
-			return p;
+		auto pc = constants_.find(n);
+		if (pc)
+			return pc;
+		auto pv = vars_.find(n);
+		if (pv)
+			return pv;
 		return parent_scope_->find(n);
 	}
 	void CKLocalTable::dump(CIOStream& os) const
@@ -366,6 +418,17 @@ namespace cecko {
 		else
 		{
 			return globtable_->declare_typedef(name, type_pack);
+		}
+	}
+	CKConstantConstObs CKContext::define_constant(const std::string& name, CKTypeObs type, CKIRConstantIntObs value)
+	{
+		if (!!loctable_)
+		{
+			return loctable_->declare_constant(name, type, value);
+		}
+		else
+		{
+			return globtable_->declare_constant(name, type, value);
 		}
 	}
 	CKVarObs CKContext::define_var(const std::string& name, const CKTypeRefPack& type_pack)
