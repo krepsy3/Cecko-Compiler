@@ -56,6 +56,7 @@ namespace cecko {
 
 		extern err_def_n INTERNAL;
 		extern err_def_n EMPTYCHAR;
+		extern err_def_n MULTICHAR_LONG;
 		extern err_def_n EOLINSTRCHR;
 		extern err_def_n EOFINSTRCHR;
 		extern err_def_n EOFINCMT;
