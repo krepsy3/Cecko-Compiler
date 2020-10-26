@@ -254,7 +254,7 @@ type-specifier:
 	typedef-name
 
 struct-or-union-specifier:
-	struct-or-union identifier_opt { member-declaration-list }
+	struct-or-union identifier { member-declaration-list }
 	struct-or-union identifier
 
 struct-or-union:
@@ -283,8 +283,8 @@ member-declarator:
 	declarator
 
 enum-specifier:
-	enum identifier_opt { enumerator-list }
-	enum identifier_opt { enumerator-list , }
+	enum identifier { enumerator-list }
+	enum identifier { enumerator-list , }
 	enum identifier
 
 enumerator-list:
