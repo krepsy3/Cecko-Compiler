@@ -358,15 +358,11 @@ typedef-name:
 
 ```
 statement:
-	labeled-statement
 	expression-statement
 	compound-statement
 	selection-statement
 	iteration-statement
 	jump-statement
-
-labeled-statement:
-	identifier : statement
 
 compound-statement:
 	{ block-item-list_opt }
@@ -392,9 +388,6 @@ iteration-statement:
 	for ( expression_opt ; expression_opt ; expression_opt ) statement
 
 jump-statement:
-	goto identifier ;
-	continue ;
-	break ;
 	return expression_opt ;
 ```
 
