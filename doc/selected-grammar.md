@@ -147,7 +147,7 @@ primary-expression:
 postfix-expression:
 	primary-expression
 	postfix-expression [ expression ]
-	postfix-expression ( argument-expression-list_opt> )
+	postfix-expression ( argument-expression-list_opt )
 	postfix-expression . identifier
 	postfix-expression -> identifier
 	postfix-expression ++
