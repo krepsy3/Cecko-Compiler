@@ -335,6 +335,9 @@ identifier-list:
 	identifier
 	identifier-list , identifier
 
+type-name:
+	specifier-qualifier-list abstract-declarator_opt
+
 abstract-declarator:
 	one-pointer
 	one-pointer_opt direct-abstract-declarator
