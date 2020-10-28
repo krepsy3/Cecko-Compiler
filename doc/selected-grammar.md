@@ -331,10 +331,6 @@ parameter-declaration:
 	declaration-specifiers declarator
 	declaration-specifiers abstract-declarator_opt
 
-identifier-list:
-	identifier
-	identifier-list , identifier
-
 type-name:
 	specifier-qualifier-list abstract-declarator_opt
 
