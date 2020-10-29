@@ -21,9 +21,11 @@ int main(int argc, char** argv)
 	a = 1+2*3-8/sizeof(int);
 	int b;
 	b = a+argc;
-	int r = fce(a, b);
+	int r;
+	r = fce(a, b);
 	
-	int *p = &r;
+	int *p;
+	p = &r;
 
 	*p = fce(a+b, b-a);
 
