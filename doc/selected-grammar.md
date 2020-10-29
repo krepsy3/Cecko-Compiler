@@ -299,7 +299,7 @@ type-qualifier:
 	const
 
 declarator:
-	one-pointer_opt direct-declarator
+	pointer_opt direct-declarator
 
 direct-declarator:
 	identifier
@@ -313,8 +313,9 @@ array-declarator:
 function-declarator:
 	direct-declarator ( parameter-type-list )
 
-one-pointer:
+pointer:
 	* type-qualifier-list_opt
+	* type-qualifier-list_opt pointer
 
 type-qualifier-list:
 	type-qualifier
@@ -335,8 +336,8 @@ type-name:
 	specifier-qualifier-list abstract-declarator_opt
 
 abstract-declarator:
-	one-pointer
-	one-pointer_opt direct-abstract-declarator
+	pointer
+	pointer_opt direct-abstract-declarator
 
 direct-abstract-declarator:
 	( abstract-declarator )
