@@ -27,12 +27,12 @@ MAKE_TEST("1" "testla-num-n")
 MAKE_TEST("1" "testla-str-n")
 
 MAKE_TEST("2" "test1")
-MAKE_TEST("2" "test2typedef")
 MAKE_TEST("2" "testsxa-arr")
 MAKE_TEST("2" "testsxa-enum")
 MAKE_TEST("2" "testsxa-expr")
 MAKE_TEST("2" "testsxa-stmt")
 MAKE_TEST("2" "testsxa-struct")
+MAKE_TEST("2" "testsxa-typedef")
 
 MAKE_TEST("3" "test1")
 MAKE_TEST("3" "test2typedef")
