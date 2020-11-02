@@ -348,7 +348,7 @@ array-abstract-declarator:
 	direct-abstract-declarator_opt [ assignment-expression ]
 
 function-abstract-declarator:
-	direct-abstract-declarator_opt ( parameter-type-list_opt )
+	direct-abstract-declarator_opt ( parameter-type-list )
 
 typedef-name:
 	identifier
