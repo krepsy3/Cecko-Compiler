@@ -9,4 +9,5 @@ int main(int argc, char** argv)
 
 	enum rgb { RED, GREEN, BLUE } color;
 	color = GREEN;
+	return color;
 }
