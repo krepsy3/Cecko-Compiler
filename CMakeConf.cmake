@@ -22,6 +22,15 @@ else()
 	llvm_map_components_to_libnames(LLVM_LIBS_USED core mcjit nativecodegen)	# executionengine interpreter mc support x86codegen
 endif()
 
+if(NOT DEFINED MAKE_DOXYGEN)
+	set(MAKE_DOXYGEN FALSE CACHE BOOL "Generate doxygen")
+	message("MAKE_DOXYGEN was not defined, defaulting to FALSE")
+endif()
+
+if(MAKE_DOXYGEN)
+	find_package(Doxygen REQUIRED dot)
+endif()
+
 set(THREADS_PREFER_PTHREAD_FLAG True)
 find_package(Threads REQUIRED)
 
@@ -161,4 +170,10 @@ function(SOLUTION_LIBRARY_DUMP TARGET FRAMEWORK FRAMEWORK_DUMP)
 
 	add_dependencies("${TARGET}" ${FRAMEWORK_DUMP})
 	target_link_libraries("${TARGET}" PUBLIC ${FRAMEWORK_DUMP})
+endfunction()
+
+function(DOXYGEN TARGET)
+	if(MAKE_DOXYGEN)
+		doxygen_add_docs("${TARGET}" ${ARGN} ALL)
+	endif()
 endfunction()
