@@ -1,8 +1,8 @@
-/*
+/** @file
 
 grptokens.hpp
 
-group tokens
+Group tokens.
 
 */
 

@@ -1,8 +1,8 @@
-/*
+/** @file
 
-context.hpp
+ckcontext.hpp
 
-context for the compiler
+State-aware upper layer of lexer/parser context.
 
 */
 
@@ -151,23 +151,42 @@ namespace cecko {
 
 	class context : public CKContext {
 	public:
+		/// @cond INTERNAL
 		context(CKTablesObs tables, std::ostream* outp, coverage::coverage_data * cd) : CKContext(tables), line_(1), outp_(outp), cd_(cd) {}
 
 		std::ostream& out() { return *outp_; }
+		/// @endcond
 
+		/// @name Generating error messages
+		/// @{
+		
+		/// <param name="err">Error descriptor</param>
+		/// <param name="loc">Line number</param>
+		/// <param name="msg">A string argument</param>
 		void message(errors::err_s err, loc_t loc, std::string_view msg);
+
+		/// <param name="err">Error descriptor</param>
+		/// <param name="loc">Line number</param>
 		void message(errors::err_n err, loc_t loc);
-
+		/// @}
+		
+		/// @cond INTERNAL
 		static std::string escape(std::string_view s);
-
-		loc_t line() const { return line_; }
-		loc_t incline() { return line_++; }		// returns line value before increment
-
+		/// @endcond
+		
+		/// @name Lexer source-line counting
+		/// @{
+		
+		loc_t line() const { return line_; }	///< Get current line
+		loc_t incline() { return line_++; }		///< Increment current line
+		/// @}
+		
+		/// @cond COVERAGE
 		void cov(std::string n)
 		{
 			cd_->inc(line(), std::move(n));
 		}
-
+		/// @endcond
 	private:
 		loc_t	line_;
 

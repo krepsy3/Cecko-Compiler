@@ -318,7 +318,7 @@ namespace cecko {
 			a->dump(os, indent);
 			});
 		auto typedeflambda = [&os, &indent](auto&& a) {
-			os << indent << "typedef " << a->get_type()->declaration(false, a->get_name()) << ";" << CIEndl;
+			os << indent << "typedef " << a->get_type_pack().type->declaration(a->get_type_pack().is_const, a->get_name()) << ";" << CIEndl;
 		};
 		typedefs_.for_each(typedeflambda);
 	}
@@ -382,7 +382,7 @@ namespace cecko {
 
 	void CKVar::dump(CIOStream& os, const std::string& indent) const
 	{
-		os << indent << get_type_pack().type->declaration(get_type_pack().is_const, get_name()) << ";" << CIEndl;
+		os << indent << get_type()->declaration(is_const(), get_name()) << ";" << CIEndl;
 	}
 
 	// CONTEXT
