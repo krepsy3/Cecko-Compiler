@@ -914,13 +914,15 @@ namespace cecko {
 		/// @name Named struct types
 		/// @{
 		CKStructTypeObs declare_struct_type(const CIName& n);
-		CKStructTypeObs find_struct_type(const CIName& n);
+		CKStructTypeObs define_struct_type_open(const CIName& n);
+		void define_struct_type_close(CKStructTypeObs type, const CKStructItemArray& items);
 		/// @}
 
 		/// @name Named enum types
 		/// @{
 		CKEnumTypeObs declare_enum_type(const CIName& n);
-		CKEnumTypeObs find_enum_type(const CIName& n);
+		CKEnumTypeObs define_enum_type_open(const CIName& n);
+		void define_enum_type_close(CKEnumTypeObs type, CKConstantObsVector items);
 		/// @}
 
 		/// @name Variables

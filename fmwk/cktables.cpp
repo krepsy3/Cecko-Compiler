@@ -463,17 +463,22 @@ namespace cecko {
 			return globtable_->declare_struct_type(n, module_->getContext());
 		}
 	}
-	CKStructTypeObs CKContext::find_struct_type(const CIName& n) 
+	CKStructTypeObs CKContext::define_struct_type_open(const CIName& n) 
 	{ 
 		if (!!loctable_)
 		{
-			return loctable_->find_struct_type(n);
+			return loctable_->declare_struct_type_here(n, module_->getContext());
 		}
 		else
 		{
-			return globtable_->find_struct_type(n);
+			return globtable_->declare_struct_type_here(n, module_->getContext());
 		}
 	}
+	void CKContext::define_struct_type_close(CKStructTypeObs type, const CKStructItemArray& items)
+	{
+		type->finalize(items);
+	}
+
 	CKEnumTypeObs CKContext::declare_enum_type(const CIName& n)
 	{
 		if (!!loctable_)
@@ -485,17 +490,22 @@ namespace cecko {
 			return globtable_->declare_enum_type(n, get_int_type());
 		}
 	}
-	CKEnumTypeObs CKContext::find_enum_type(const CIName& n) 
+	CKEnumTypeObs CKContext::define_enum_type_open(const CIName& n) 
 	{ 
 		if (!!loctable_)
 		{
-			return loctable_->find_enum_type(n);
+			return loctable_->declare_enum_type_here(n, get_int_type());
 		}
 		else
 		{
-			return globtable_->find_enum_type(n);
+			return globtable_->declare_enum_type_here(n, get_int_type());
 		}
 	}
+	void CKContext::define_enum_type_close(CKEnumTypeObs type, CKConstantObsVector items)
+	{
+		type->finalize(std::move(items));
+	}
+
 	CKTypedefConstObs CKContext::define_typedef(const std::string& name, const CKTypeRefPack& type_pack)
 	{
 		if (!!loctable_)
