@@ -274,6 +274,35 @@ namespace cecko {
 		return vars_.try_emplace(name, type_pack, var, false);
 	}
 
+	CKStructTypeObs CKLocalTable::declare_struct_type(const CIName& n, CKIRContextRef Context)
+	{
+		auto p = find_struct_type(n);
+		if (p)
+			return p;
+		return declare_struct_type_here(n, Context);
+	}
+	CKStructTypeObs CKLocalTable::find_struct_type(const CIName& n) 
+	{ 
+		auto p = find_struct_type_here(n);
+		if (p)
+			return p;
+		return parent_scope_->find_struct_type(n);
+	}
+	CKEnumTypeObs CKLocalTable::declare_enum_type(const CIName& n, CKTypeObs base_type)
+	{
+		auto p = find_enum_type(n);
+		if (p)
+			return p;
+		return declare_enum_type_here(n, base_type);
+	}
+	CKEnumTypeObs CKLocalTable::find_enum_type(const CIName& n) 
+	{ 
+		auto p = find_enum_type_here(n); 
+		if (p)
+			return p;
+		return parent_scope_->find_enum_type(n);
+	}
+
 	CKTypedefConstObs CKLocalTable::find_typedef(const CIName& n) const
 	{
 		auto p = find_typedef_here(n);
@@ -418,7 +447,9 @@ namespace cecko {
 		globtable_(tab->globtable()),
 		loctable_(nullptr),
 		module_(tab->module()),
+		alloca_builder_(tab->module()->getContext()),
 		builder_(tab->module()->getContext()),
+		start_bb_(nullptr),
 		data_layout_(tab->data_layout())
 	{
 	}
@@ -427,9 +458,11 @@ namespace cecko {
 	{
 		assert(!loctable_);
 		// FUNCTION PROLOG
-		auto BB = CKCreateBasicBlock("prolog", f->get_function_ir());
-		builder_.SetInsertPoint(BB);
-		loctable_ = f->define(globtable_, builder_, std::move(pack));
+		auto BB0 = CKCreateBasicBlock("prolog", f->get_function_ir());
+		alloca_builder_.SetInsertPoint(BB0);
+		loctable_ = f->define(globtable_, alloca_builder_, std::move(pack));
+		start_bb_ = CKCreateBasicBlock("start", f->get_function_ir());
+		builder_.SetInsertPoint(start_bb_);
 	}
 
 	void CKContext::exit_function()
@@ -437,6 +470,9 @@ namespace cecko {
 		assert(loctable_);
 		loctable_ = nullptr;
 		builder_.ClearInsertionPoint();
+		alloca_builder_.CreateBr(start_bb_);
+		start_bb_ = nullptr;
+		alloca_builder_.ClearInsertionPoint();
 	}
 
 	void CKContext::enter_block()
