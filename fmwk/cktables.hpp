@@ -269,6 +269,12 @@ namespace cecko {
 		
 		/// The return type of a function type
 		virtual CKTypeObs get_function_return_type() const { assert(0); return nullptr; }
+		/// The selected argument type of a function type
+		virtual CKTypeObs get_function_arg_type(std::size_t ix) const { return nullptr; }
+		/// The number of arguments of a function type
+		virtual std::size_t get_function_arg_count() const { return 0; }
+		/// Check whether a function type is variadic
+		virtual bool is_function_variadic() const { return false; }
 		/// @}
 
 		/// @name Array properties
@@ -550,6 +556,7 @@ namespace cecko {
 		virtual CKTypeObs get_function_return_type() const override { return ret_type_; }
 		virtual CKTypeObs get_function_arg_type(std::size_t ix) const override { return arg_types_[ix]; }
 		virtual std::size_t get_function_arg_count() const override { return arg_types_.size(); }
+		virtual bool is_function_variadic() const override { return variadic_; }
 
 		virtual CITypeMangle mangle() const override;
 		virtual CIDecl declaration(bool is_const, const CIDecl& dtor) const override;
