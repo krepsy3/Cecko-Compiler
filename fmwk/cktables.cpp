@@ -517,26 +517,26 @@ namespace cecko {
 			return globtable_->declare_typedef(name, type_pack);
 		}
 	}
-	CKConstantConstObs CKContext::define_constant(const std::string& name, CKTypeObs type, CKIRConstantIntObs value)
+	CKConstantConstObs CKContext::define_constant(const std::string& name, CKIRConstantIntObs value)
 	{
 		if (!!loctable_)
 		{
-			return loctable_->declare_constant(name, type, value);
+			return loctable_->declare_constant(name, get_int_type(), value);
 		}
 		else
 		{
-			return globtable_->declare_constant(name, type, value);
+			return globtable_->declare_constant(name, get_int_type(), value);
 		}
 	}
-	CKVarObs CKContext::define_var(const std::string& name, const CKTypeRefPack& type_pack)
+	void CKContext::define_var(const std::string& name, const CKTypeRefPack& type_pack)
 	{
 		if (!!loctable_)
 		{
-			return loctable_->varDefine(builder_, name, type_pack);
+			loctable_->varDefine(alloca_builder_, name, type_pack);
 		}
 		else
 		{
-			return globtable_->varDefine(module_, name, type_pack);
+			globtable_->varDefine(module_, name, type_pack);
 		}
 	}
 	CKNamedObs CKContext::find(const CIName& n)

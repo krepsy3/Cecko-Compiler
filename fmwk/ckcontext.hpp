@@ -18,58 +18,73 @@ State-aware upper layer of lexer/parser context.
 
 namespace cecko {
 
+	/// Line number in the compiled source file
 	using loc_t = unsigned;
 
 	namespace errors {
 		// messages
 
+		/// @cond INTERNAL
 		template< std::size_t N>
 		using err_object_base = std::array<const char*, N>;
+		/// @endcond 
 
+		/// Error message with a string parameter
 		class err_object_s : public err_object_base<2> {
 		public:
+			/// @cond INTERNAL
 			err_object_s(const char* e0, const char* e1)
 				: err_object_base<2>{ e0, e1 }
 			{}
+			/// @endcond 
 		};
 
+		/// Error message without parameters
 		class err_object_n : public err_object_base<1> {
 		public:
+			/// @cond INTERNAL
 			err_object_n(const char* e0)
 				: err_object_base<1>{ e0 }
 			{}
+			/// @endcond 
 		};
 
+		/// Error message with a string parameter
 		using err_def_s = const err_object_s;
+		/// Error message with a string parameter
 		using err_s = std::reference_wrapper<err_def_s>;
 
+		/// Error message without parameters
 		using err_def_n = const err_object_n;
+		/// Error message without parameters
 		using err_n = std::reference_wrapper<err_def_n>;
 
-		extern err_def_s SYNTAX;
-		extern err_def_s INTOUTRANGE;
-		extern err_def_s BADINT;
-		extern err_def_s BADESCAPE;
-		extern err_def_s UNCHAR;
-		extern err_def_s NOFILE;
-		extern err_def_s UNDEF_IDF;
+		extern err_def_s SYNTAX;	///< Syntax error
+		extern err_def_s INTOUTRANGE;	///< Integer literal out of range
+		extern err_def_s BADINT;	///< Malformed integer literal
+		extern err_def_s BADESCAPE;	///< Malformed escape sequence
+		extern err_def_s UNCHAR;	///< Invalid character
+		extern err_def_s NOFILE;	///< Cannot open input file
+		extern err_def_s UNDEF_IDF;	///< Undefined identifier of constant/variable/function
+		//extern err_def_s UNDEF_TYPEIDF;	///< Undefined type identifier
 
-		extern err_def_n INTERNAL;
-		extern err_def_n EMPTYCHAR;
-		extern err_def_n MULTICHAR_LONG;
-		extern err_def_n EOLINSTRCHR;
-		extern err_def_n EOFINSTRCHR;
-		extern err_def_n EOFINCMT;
-		extern err_def_n UNEXPENDCMT;
-		extern err_def_n VOIDEXPR;
-		extern err_def_n ARRAY_NOT_LVALUE;
-		extern err_def_n NAME_NOT_VALUE;
-		extern err_def_n NOT_NUMBER;
-		extern err_def_n NOT_POINTER;
-		extern err_def_n NOT_NUMBER_OR_POINTER;
-		extern err_def_n INCOMPATIBLE;
+		extern err_def_n INTERNAL;	///< Internal error
+		extern err_def_n EMPTYCHAR;	///< Empty character literal
+		extern err_def_n MULTICHAR_LONG;	///< Too long character literal
+		extern err_def_n EOLINSTRCHR;	///< End of line in string/character literal
+		extern err_def_n EOFINSTRCHR;	///< End of file in string/character literal
+		extern err_def_n EOFINCMT;	///< End of file in comment
+		extern err_def_n UNEXPENDCMT;	///< Unexpected end of comment
+		extern err_def_n VOIDEXPR;	///< Expression is of void type
+		//extern err_def_n ARRAY_NOT_LVALUE;	///< Array is not lvalue?
+		//extern err_def_n NAME_NOT_VALUE;
+		extern err_def_n NOT_NUMBER;	///< Expression is not a number
+		extern err_def_n NOT_POINTER;	///< Expression is not a pointer
+		extern err_def_n NOT_NUMBER_OR_POINTER; 	///< Expression is not a number or pointer
+		extern err_def_n INCOMPATIBLE;		///< Incompatible operands
 	}
 
+	/// @cond COVERAGE
 	namespace coverage {
 
 		struct coverage_counter {
@@ -148,7 +163,9 @@ namespace cecko {
 			line_map_t line_map_;
 		};
 	}
+	/// @endcond
 
+	/// Lexical level of compiler context + error messaging
 	class context : public CKContext {
 	public:
 		/// @cond INTERNAL
@@ -195,6 +212,7 @@ namespace cecko {
 		coverage::coverage_data * cd_;
 	};
 
+	/// Pointer to compiler context
 	using context_obs = context*;
 }
 
