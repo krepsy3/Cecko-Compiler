@@ -454,7 +454,7 @@ namespace cecko {
 	{
 	}
 
-	void CKContext::enter_function(CKFunctionObs f, CKFunctionFormalPackArray pack)
+	void CKContext::enter_function(CKFunctionObs f, CKFunctionFormalPackArray pack, loc_t loc)
 	{
 		assert(!loctable_);
 		// FUNCTION PROLOG
@@ -488,7 +488,7 @@ namespace cecko {
 		assert(loctable_);
 	}
 
-	CKStructTypeObs CKContext::declare_struct_type(const CIName& n)
+	CKStructTypeObs CKContext::declare_struct_type(const CIName& n, loc_t loc)
 	{
 		if (!!loctable_)
 		{
@@ -499,7 +499,7 @@ namespace cecko {
 			return globtable_->declare_struct_type(n, module_->getContext());
 		}
 	}
-	CKStructTypeObs CKContext::define_struct_type_open(const CIName& n) 
+	CKStructTypeObs CKContext::define_struct_type_open(const CIName& n, loc_t loc)
 	{ 
 		if (!!loctable_)
 		{
@@ -515,7 +515,7 @@ namespace cecko {
 		type->finalize(items);
 	}
 
-	CKEnumTypeObs CKContext::declare_enum_type(const CIName& n)
+	CKEnumTypeObs CKContext::declare_enum_type(const CIName& n, loc_t loc)
 	{
 		if (!!loctable_)
 		{
@@ -526,7 +526,7 @@ namespace cecko {
 			return globtable_->declare_enum_type(n, get_int_type());
 		}
 	}
-	CKEnumTypeObs CKContext::define_enum_type_open(const CIName& n) 
+	CKEnumTypeObs CKContext::define_enum_type_open(const CIName& n, loc_t loc)
 	{ 
 		if (!!loctable_)
 		{
@@ -542,7 +542,7 @@ namespace cecko {
 		type->finalize(std::move(items));
 	}
 
-	CKTypedefConstObs CKContext::define_typedef(const std::string& name, const CKTypeRefPack& type_pack)
+	CKTypedefConstObs CKContext::define_typedef(const std::string& name, const CKTypeRefPack& type_pack, loc_t loc)
 	{
 		if (!!loctable_)
 		{
@@ -553,7 +553,7 @@ namespace cecko {
 			return globtable_->declare_typedef(name, type_pack);
 		}
 	}
-	CKConstantConstObs CKContext::define_constant(const std::string& name, CKIRConstantIntObs value)
+	CKConstantConstObs CKContext::define_constant(const std::string& name, CKIRConstantIntObs value, loc_t loc)
 	{
 		if (!!loctable_)
 		{
@@ -564,7 +564,7 @@ namespace cecko {
 			return globtable_->declare_constant(name, get_int_type(), value);
 		}
 	}
-	void CKContext::define_var(const std::string& name, const CKTypeRefPack& type_pack)
+	void CKContext::define_var(const std::string& name, const CKTypeRefPack& type_pack, loc_t loc)
 	{
 		if (!!loctable_)
 		{

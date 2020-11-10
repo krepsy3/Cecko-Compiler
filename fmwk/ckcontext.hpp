@@ -18,9 +18,6 @@ State-aware upper layer of lexer/parser context.
 
 namespace cecko {
 
-	/// Line number in the compiled source file
-	using loc_t = unsigned;
-
 	namespace errors {
 		// messages
 

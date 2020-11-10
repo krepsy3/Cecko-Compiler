@@ -19,6 +19,10 @@ Semantic tables.
 #include <optional>
 
 namespace cecko {
+
+	/// Line number in the compiled source file
+	using loc_t = unsigned;
+
 	class CIAbstractType;
 
 	/// Pointer to a type descriptor
@@ -122,10 +126,15 @@ namespace cecko {
 		container_type_ data_;
 	};
 
+	/// @endcond
+
 	// NAMED STORAGE
 
+	/// Identifier as represented in the attribute of a IDF/TYPEIDF token
 	using CIName = std::string;
 
+	/// @cond INTERNAL
+	
 	template< typename T>
 	class CINamedStorage : CIImmovable {
 	public:
@@ -816,7 +825,7 @@ namespace cecko {
 		}
 		CKEnumTypeObs find_enum_type_here(const CIName& n) { return enmts_.find(n); }
 		CKTypedefConstObs declare_typedef(const CIName& name, const CKTypeRefPack& type_pack);
-		CKConstantConstObs declare_constant(const std::string& name, CKTypeObs type, CKIRConstantIntObs value);
+		CKConstantConstObs declare_constant(const CIName& name, CKTypeObs type, CKIRConstantIntObs value);
 		CKTypedefConstObs find_typedef_here(const CIName& n) const;
 		CKNamedObs find_constant_here(const CIName& n);
 		void dump_universal(CIOStream& os, const std::string& indent) const;
@@ -838,8 +847,8 @@ namespace cecko {
 	public:
 		CKGlobalTable()
 		{}
-		CKGlobalVarObs varDefine(CKIRModuleObs M, const std::string& name, const CKTypeRefPack& type_pack);
-		CKGlobalVarObs declare_extern_variable(CKIRModuleObs M, const std::string& name, const CKTypeRefPack& type_pack);
+		CKGlobalVarObs varDefine(CKIRModuleObs M, const CIName& name, const CKTypeRefPack& type_pack);
+		CKGlobalVarObs declare_extern_variable(CKIRModuleObs M, const CIName& name, const CKTypeRefPack& type_pack);
 		CKStructTypeObs declare_struct_type(const CIName& n, CKIRContextRef Context)
 		{
 			return declare_struct_type_here(n, Context);
@@ -851,7 +860,7 @@ namespace cecko {
 		}
 		virtual CKEnumTypeObs find_enum_type(const CIName& n) override { return find_enum_type_here(n); }
 		CKFunctionObs declare_function(const CIName& n, CKIRModuleObs M, CKFunctionTypeObs type);
-		CKFunctionObs declare_function(const CIName& n, CKIRModuleObs M, CKFunctionTypeObs type, const std::string& irname);
+		CKFunctionObs declare_function(const CIName& n, CKIRModuleObs M, CKFunctionTypeObs type, const CIName& irname);
 		CKFunctionObs find_function(const CIName& n);
 		CKFunctionConstObs find_function(const CIName& n) const;
 		virtual CKTypedefConstObs find_typedef(const CIName& n) const;
@@ -896,7 +905,7 @@ namespace cecko {
 
 		void varsFromArgs(CKIRBuilderRef builder, CKFunctionObs f, const CKFunctionFormalPackArray& formal_packs);
 
-		CKLocalVarObs varDefine(CKIRBuilderRef builder, const std::string& name, const CKTypeRefPack& type_pack);
+		CKLocalVarObs varDefine(CKIRBuilderRef builder, const CIName& name, const CKTypeRefPack& type_pack);
 
 		virtual CKTypedefConstObs find_typedef(const CIName& n) const;
 		virtual CKNamedObs find(const CIName& n);
@@ -980,7 +989,7 @@ namespace cecko {
 		/// @{
 		
 		/// Signalize entering of the compound statement of the definition of the function f
-		void enter_function(CKFunctionObs f, CKFunctionFormalPackArray pack);
+		void enter_function(CKFunctionObs f, CKFunctionFormalPackArray pack, loc_t loc);
 		/// Signalize exiting of the compound statement of the definition of a function
 		void exit_function();
 		/// Signalize entering of a compound statement other than a function definition
@@ -1017,9 +1026,9 @@ namespace cecko {
 		/// @{
 		
 		/// Reference or declare a struct type
-		CKStructTypeObs declare_struct_type(const CIName& n);
+		CKStructTypeObs declare_struct_type(const CIName& n, loc_t loc);
 		/// Signalize entering the definition of the struct type named n
-		CKStructTypeObs define_struct_type_open(const CIName& n);
+		CKStructTypeObs define_struct_type_open(const CIName& n, loc_t loc);
 		/// Signalize exiting the definition of the struct type type
 		void define_struct_type_close(CKStructTypeObs type, const CKStructItemArray& items);
 		/// @}
@@ -1028,9 +1037,9 @@ namespace cecko {
 		/// @{
 
 		/// Reference or declare an enum type
-		CKEnumTypeObs declare_enum_type(const CIName& n);
+		CKEnumTypeObs declare_enum_type(const CIName& n, loc_t loc);
 		/// Signalize entering the definition of the enum type named n
-		CKEnumTypeObs define_enum_type_open(const CIName& n);
+		CKEnumTypeObs define_enum_type_open(const CIName& n, loc_t loc);
 		/// Signalize exiting the definition of the enum type type
 		void define_enum_type_close(CKEnumTypeObs type, CKConstantObsVector items);
 		/// @}
@@ -1039,28 +1048,28 @@ namespace cecko {
 		/// @{
 
 		/// Define a global or local variable
-		void define_var(const std::string& name, const CKTypeRefPack& type_pack);
+		void define_var(const CIName& name, const CKTypeRefPack& type_pack, loc_t loc);
 		/// @}
 
 		/// @name Typedefs
 		/// @{
 
 		/// Define a typedef
-		CKTypedefConstObs define_typedef(const std::string& name, const CKTypeRefPack& type_pack);
+		CKTypedefConstObs define_typedef(const CIName& name, const CKTypeRefPack& type_pack, loc_t loc);
 		/// @}
 
 		/// @name Enumeration constants
 		/// @{
 
 		/// Define an enumeration constant
-		CKConstantConstObs define_constant(const std::string& name, CKIRConstantIntObs value);
+		CKConstantConstObs define_constant(const CIName& name, CKIRConstantIntObs value, loc_t loc);
 		/// @}
 
 		/// @name Functions
 		/// @{
 
 		/// Declare a function (with or without body)
-		CKFunctionObs declare_function(const CIName& n, CKFunctionTypeObs type)
+		CKFunctionObs declare_function(const CIName& n, CKFunctionTypeObs type, loc_t loc)
 		{
 			return globtable_->declare_function(n, module_, type);
 		}
