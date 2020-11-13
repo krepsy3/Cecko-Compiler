@@ -535,28 +535,28 @@ namespace cecko {
 
 	CKEnumTypeObs CKContext::declare_enum_type(const CIName& n, loc_t loc)
 	{
-		CKEnumTypeObs tp;
 		if (!!loctable_)
 		{
-			tp = loctable_->declare_enum_type(n, get_int_type(), loc);
+			return loctable_->declare_enum_type(n, get_int_type(), loc);
 		}
 		else
 		{
-			tp = globtable_->declare_enum_type(n, get_int_type(), loc);
+			return globtable_->declare_enum_type(n, get_int_type(), loc);
 		}
-		tp->set_def_loc(loc);	// !!! DUPLICITE DEFINITION ???
-		return tp;
 	}
 	CKEnumTypeObs CKContext::define_enum_type_open(const CIName& n, loc_t loc)
 	{ 
+		CKEnumTypeObs tp;
 		if (!!loctable_)
 		{
-			return loctable_->declare_enum_type_here(n, get_int_type(), loc);
+			tp = loctable_->declare_enum_type_here(n, get_int_type(), loc);
 		}
 		else
 		{
-			return globtable_->declare_enum_type_here(n, get_int_type(), loc);
+			tp = globtable_->declare_enum_type_here(n, get_int_type(), loc);
 		}
+		tp->set_def_loc(loc);	// !!! DUPLICITE DEFINITION ???
+		return tp;
 	}
 	void CKContext::define_enum_type_close(CKEnumTypeObs type, CKConstantObsVector items)
 	{
