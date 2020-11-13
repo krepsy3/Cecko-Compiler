@@ -49,7 +49,7 @@ namespace cecko {
 			else
 				r.put(ch);
 		}
-		return r.str();
+		return std::move(r).str();
 	}
 
 	void context::message(errors::err_s err, loc_t loc, std::string_view msg)

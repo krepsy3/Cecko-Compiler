@@ -187,8 +187,8 @@ namespace cecko {
 	class CINamePtr {
 	public:
 		/// @cond INTERNAL
-		CINamePtr()
-			: name_ptr_(nullptr)
+		CINamePtr(loc_t def_loc)
+			: name_ptr_(nullptr), def_loc_(def_loc)
 		{}
 		/// @endcond
 		
@@ -198,6 +198,10 @@ namespace cecko {
 			assert(!!name_ptr_);
 			return *name_ptr_;
 		}
+		/// @cond INTERNAL
+		std::string get_dump_name() const;
+		void set_def_loc(loc_t def_loc) { def_loc_ = def_loc; }
+		/// @endcond
 	private:
 		void set_name_ptr(const CIName* p)
 		{
@@ -205,6 +209,7 @@ namespace cecko {
 		}
 
 		const CIName* name_ptr_;
+		loc_t def_loc_;
 
 		template< typename T>
 		friend class CINamedStorage;
@@ -444,8 +449,8 @@ namespace cecko {
 	class CKStructElement : public CINamePtr, CIImmovable {
 	public:
 		/// @cond INTERNAL
-		explicit CKStructElement(const CKTypeRefPack& pack, unsigned int idx)
-			: pack_(pack), idx_(idx)
+		explicit CKStructElement(const CKTypeRefPack& pack, unsigned int idx, loc_t def_loc)
+			: CINamePtr(def_loc), pack_(pack), idx_(idx)
 		{}
 		/// @endcond
 		/// The (optionally const) type of a struct element
@@ -462,13 +467,15 @@ namespace cecko {
 	/// Temporary struct element descriptor
 	struct CKStructItem {
 		/// Construct from arguments
-		CKStructItem(const CKTypeRefPack& p, CIName nm)
-			: pack(p), name(std::move(nm))
+		CKStructItem(const CKTypeRefPack& p, CIName nm, loc_t l)
+			: pack(p), name(std::move(nm)), loc(l)
 		{}
 		/// The (optionally const) type of a struct element
 		CKTypeRefPack pack;
 		/// Name of a struct element
 		CIName name;
+		/// Definition line number
+		loc_t loc;
 	};
 
 	/// A temporary array of struct element descriptors
@@ -478,8 +485,8 @@ namespace cecko {
 	class CKStructType : public CIAbstractType, public CINamePtr {
 	public:
 		/// @cond INTERNAL
-		CKStructType(CKIRContextRef Context, const CIName& n)
-			: defined_(false), irt_(CKCreateStructType(Context, n))
+		CKStructType(CKIRContextRef Context, const CIName& n, loc_t decl_loc)
+			: CINamePtr(0), decl_loc_(decl_loc), defined_(false), irt_(CKCreateStructType(Context, n))
 		{}
 		void finalize(const CKStructItemArray& items);
 
@@ -504,6 +511,7 @@ namespace cecko {
 		/// @endcond
 	private:
 		using element_storage_type = CINamedStorage< CKStructElement>;
+		loc_t decl_loc_;
 		bool defined_;
 		element_storage_type elements_;
 		std::vector< CKStructElementObs> elements_ordered_;
@@ -522,8 +530,8 @@ namespace cecko {
 	class CKEnumType : public CIAbstractType, public CINamePtr {
 	public:
 		/// @cond INTERNAL
-		CKEnumType(CKTypeObs base_type)
-			: defined_(false), base_type_(base_type)
+		CKEnumType(CKTypeObs base_type, loc_t decl_loc)
+			: CINamePtr(0), decl_loc_(decl_loc), defined_(false), base_type_(base_type)
 		{}
 		void finalize(CKConstantObsVector items);
 
@@ -541,6 +549,7 @@ namespace cecko {
 		void dump(CIOStream& os, const std::string& indent) const;
 		/// @endcond
 	private:
+		loc_t decl_loc_;
 		bool defined_;
 		CKTypeObs base_type_;
 		CKConstantObsVector elements_ordered_;
@@ -625,6 +634,9 @@ namespace cecko {
 	class CKAbstractNamed : public CINamePtr, CIImmovable {
 	public:
 		/// @cond INTERNAL
+		CKAbstractNamed(loc_t def_loc)
+			: CINamePtr(def_loc)
+		{}
 		virtual ~CKAbstractNamed() {}
 		/// @endcond
 		/// @name Determining the kind of the object 
@@ -665,8 +677,8 @@ namespace cecko {
 	class CKTypedef : public CINamePtr, CIImmovable {
 	public:
 		/// @cond INTERNAL
-		CKTypedef(CKTypeRefPack type_pack)
-			: type_pack_(type_pack)
+		CKTypedef(CKTypeRefPack type_pack, loc_t def_loc)
+			: CINamePtr(def_loc), type_pack_(type_pack)
 		{}
 		/// @endcond
 		//virtual bool is_typedef() const { return true; }
@@ -690,8 +702,8 @@ namespace cecko {
 	class CKConstant : public CKAbstractNamed {
 	public:
 		/// @cond INTERNAL
-		CKConstant(CKTypeObs type, CKIRConstantIntObs value)
-			: type_pack_(type, true), value_(value)
+		CKConstant(CKTypeObs type, CKIRConstantIntObs value, loc_t def_loc)
+			: CKAbstractNamed(def_loc), type_pack_(type, true), value_(value)
 		{}
 		virtual bool is_constant() const override { return true; }
 		virtual CKTypeObs get_type() const override { return type_pack_.type; }
@@ -714,8 +726,8 @@ namespace cecko {
 	class CKVar : public CKAbstractNamed {
 	public:
 		/// @cond INTERNAL
-		CKVar(CKTypeRefPack type_pack)
-			: type_pack_(type_pack)
+		CKVar(CKTypeRefPack type_pack, loc_t def_loc)
+			: CKAbstractNamed(def_loc), type_pack_(type_pack)
 		{}
 		/// @endcond
 		virtual bool is_var() const { return true; }
@@ -733,8 +745,8 @@ namespace cecko {
 	class CKGlobalVar : public CKVar {
 	public:
 		/// @cond INTERNAL
-		CKGlobalVar(CKTypeRefPack type_pack, CKIRConstantObs address)
-			: CKVar(type_pack), address_(address)
+		CKGlobalVar(CKTypeRefPack type_pack, CKIRConstantObs address, loc_t def_loc)
+			: CKVar(type_pack, def_loc), address_(address)
 		{}
 		virtual CKIRValueObs get_ir() const { return address_; }
 		CKIRConstantObs get_address() const { return address_; }
@@ -753,13 +765,15 @@ namespace cecko {
 	/// Temporary additional function argument descriptor
 	struct CKFunctionFormalPack {
 		/// Construct from arguments
-		CKFunctionFormalPack(CINameOpt nm, bool c)
-			: name(std::move(nm)), is_const(c)
+		CKFunctionFormalPack(CINameOpt nm, bool c, loc_t loc)
+			: name(std::move(nm)), is_const(c), loc( loc)
 		{}
 		/// Optional name of the argument
 		CINameOpt name;
 		/// Optional "const" flag
 		bool is_const;
+		/// Definition line number
+		loc_t loc;
 	};
 
 	/// @cond INTERNAL
@@ -788,8 +802,8 @@ namespace cecko {
 	class CKFunction : public CKAbstractNamed {
 	public:
 		/// @cond INTERNAL
-		CKFunction(CKIRModuleObs M, CKFunctionTypeObs type, const CIName& irname)
-			: type_(type), irf_(CKCreateFunction(type->get_function_ir(), irname, M))
+		CKFunction(CKIRModuleObs M, CKFunctionTypeObs type, const CIName& irname, loc_t def_loc)
+			: CKAbstractNamed(def_loc), type_(type), irf_(CKCreateFunction(type->get_function_ir(), irname, M))
 		{}
 		virtual bool is_function() const override { return true; }
 
@@ -814,18 +828,18 @@ namespace cecko {
 	/// @cond INTERNAL
 	class CKUniversalTable : public CKAbstractScope {
 	public:
-		CKStructTypeObs declare_struct_type_here(const CIName& n, CKIRContextRef Context)
+		CKStructTypeObs declare_struct_type_here(const CIName& n, CKIRContextRef Context, loc_t decl_loc)
 		{
-			return strts_.try_emplace(n, Context, n);
+			return strts_.try_emplace(n, Context, n, decl_loc);
 		}
 		CKStructTypeObs find_struct_type_here(const CIName& n) { return strts_.find(n); }
-		CKEnumTypeObs declare_enum_type_here(const CIName& n, CKTypeObs base_type)
+		CKEnumTypeObs declare_enum_type_here(const CIName& n, CKTypeObs base_type, loc_t decl_loc)
 		{
-			return enmts_.try_emplace(n, base_type);
+			return enmts_.try_emplace(n, base_type, decl_loc);
 		}
 		CKEnumTypeObs find_enum_type_here(const CIName& n) { return enmts_.find(n); }
-		CKTypedefConstObs declare_typedef(const CIName& name, const CKTypeRefPack& type_pack);
-		CKConstantConstObs declare_constant(const CIName& name, CKTypeObs type, CKIRConstantIntObs value);
+		CKTypedefConstObs declare_typedef(const CIName& name, const CKTypeRefPack& type_pack, loc_t def_loc);
+		CKConstantConstObs declare_constant(const CIName& name, CKTypeObs type, CKIRConstantIntObs value, loc_t def_loc);
 		CKTypedefConstObs find_typedef_here(const CIName& n) const;
 		CKNamedObs find_constant_here(const CIName& n);
 		void dump_universal(CIOStream& os, const std::string& indent) const;
@@ -847,19 +861,19 @@ namespace cecko {
 	public:
 		CKGlobalTable()
 		{}
-		CKGlobalVarObs varDefine(CKIRModuleObs M, const CIName& name, const CKTypeRefPack& type_pack);
+		CKGlobalVarObs varDefine(CKIRModuleObs M, const CIName& name, const CKTypeRefPack& type_pack, loc_t def_loc);
 		CKGlobalVarObs declare_extern_variable(CKIRModuleObs M, const CIName& name, const CKTypeRefPack& type_pack);
-		CKStructTypeObs declare_struct_type(const CIName& n, CKIRContextRef Context)
+		CKStructTypeObs declare_struct_type(const CIName& n, CKIRContextRef Context, loc_t decl_loc)
 		{
-			return declare_struct_type_here(n, Context);
+			return declare_struct_type_here(n, Context, decl_loc);
 		}
 		virtual CKStructTypeObs find_struct_type(const CIName& n) override { return find_struct_type_here(n); }
-		CKEnumTypeObs declare_enum_type(const CIName& n, CKTypeObs base_type)
+		CKEnumTypeObs declare_enum_type(const CIName& n, CKTypeObs base_type, loc_t decl_loc)
 		{
-			return declare_enum_type_here(n, base_type);
+			return declare_enum_type_here(n, base_type, decl_loc);
 		}
 		virtual CKEnumTypeObs find_enum_type(const CIName& n) override { return find_enum_type_here(n); }
-		CKFunctionObs declare_function(const CIName& n, CKIRModuleObs M, CKFunctionTypeObs type);
+		CKFunctionObs declare_function(const CIName& n, CKIRModuleObs M, CKFunctionTypeObs type, loc_t decl_loc);
 		CKFunctionObs declare_function(const CIName& n, CKIRModuleObs M, CKFunctionTypeObs type, const CIName& irname);
 		CKFunctionObs find_function(const CIName& n);
 		CKFunctionConstObs find_function(const CIName& n) const;
@@ -877,8 +891,8 @@ namespace cecko {
 	class CKLocalVar : public CKVar {
 	public:
 		/// @cond INTERNAL
-		CKLocalVar(CKTypeRefPack type_pack, CKIRAllocaInstObs address, bool is_arg = false)
-			: CKVar(type_pack), address_(address), is_arg_(is_arg)
+		CKLocalVar(CKTypeRefPack type_pack, CKIRAllocaInstObs address, loc_t def_loc, bool is_arg)
+			: CKVar(type_pack, def_loc), address_(address), is_arg_(is_arg)
 		{}
 		virtual CKIRValueObs get_ir() const { return address_; }
 		CKIRAllocaInstObs get_address() const { return address_; }
@@ -898,14 +912,14 @@ namespace cecko {
 			: parent_scope_(parent)
 		{}
 
-		CKStructTypeObs declare_struct_type(const CIName& n, CKIRContextRef Context);
+		CKStructTypeObs declare_struct_type(const CIName& n, CKIRContextRef Context, loc_t decl_loc);
 		virtual CKStructTypeObs find_struct_type(const CIName& n) override;
-		CKEnumTypeObs declare_enum_type(const CIName& n, CKTypeObs base_type);
+		CKEnumTypeObs declare_enum_type(const CIName& n, CKTypeObs base_type, loc_t decl_loc);
 		virtual CKEnumTypeObs find_enum_type(const CIName& n) override;
 
 		void varsFromArgs(CKIRBuilderRef builder, CKFunctionObs f, const CKFunctionFormalPackArray& formal_packs);
 
-		CKLocalVarObs varDefine(CKIRBuilderRef builder, const CIName& name, const CKTypeRefPack& type_pack);
+		CKLocalVarObs varDefine(CKIRBuilderRef builder, const CIName& name, const CKTypeRefPack& type_pack, loc_t def_loc);
 
 		virtual CKTypedefConstObs find_typedef(const CIName& n) const;
 		virtual CKNamedObs find(const CIName& n);
@@ -1071,7 +1085,7 @@ namespace cecko {
 		/// Declare a function (with or without body)
 		CKFunctionObs declare_function(const CIName& n, CKFunctionTypeObs type, loc_t loc)
 		{
-			return globtable_->declare_function(n, module_, type);
+			return globtable_->declare_function(n, module_, type, loc);
 		}
 		/// @}
 
