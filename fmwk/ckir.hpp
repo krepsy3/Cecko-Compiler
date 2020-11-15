@@ -36,12 +36,20 @@ A wrapper over LLVM IR.
 
 namespace cecko {
 
+	/// @cond INTERNAL
 	template< typename E>
 	struct safe_default
 	{
 		E operator()() const { return E(); }
 	};
+	/// @endcond
 
+	/// @brief Safe pointer to E
+	/// 
+	/// No crashes: When the value is nullptr, * and -> returns a dummy object responding to all member functions.
+	/// No random values: Initialized to nullptr.
+	/// Automatic conversion to E*.
+	/// Explicit conversion from E*.
 	template< typename E, typename DF = safe_default<E>>
 	class safe_ptr
 	{
