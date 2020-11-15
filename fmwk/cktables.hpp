@@ -25,11 +25,11 @@ namespace cecko {
 
 	class CIAbstractType;
 
-	/// Pointer to a type descriptor
+	/// Pointer to a type descriptor (CIAbstractType)
 	using CKTypeObs = const CIAbstractType*;	// use something smarter for safety
 
 	class CKVoidType;
-	/// Safe pointer to a type descriptor
+	/// Safe pointer to a type descriptor (CIAbstractType)
 	using CKTypeSafeObs = safe_ptr<const CIAbstractType,safe_default< const CKVoidType>>;	// use something smarter for safety
 
 	struct CKTypeRefPack;
@@ -231,9 +231,9 @@ namespace cecko {
 
 	class CKStructElement;
 
-	/// Pointer to a struct element descriptor
+	/// Pointer to a struct element descriptor (CKStructElement)
 	using CKStructElementObs = const CKStructElement*;
-	/// Pointer to a struct element descriptor
+	/// Safe pointer to a struct element descriptor (CKStructElement)
 	using CKStructElementSafeObs = safe_ptr<const CKStructElement>;
 
 	/// Type descriptor with optional "const" flag
@@ -528,7 +528,7 @@ namespace cecko {
 		loc_t loc;
 	};
 
-	/// A temporary array of struct element descriptors
+	/// A temporary array of struct element descriptors (CKStructItem)
 	using CKStructItemArray = std::vector< CKStructItem>;
 
 	/// Struct type descriptor
@@ -573,12 +573,12 @@ namespace cecko {
 
 	class CKConstant;
 
-	/// Pointer to an enumeration constant descriptor
+	/// Pointer to an enumeration constant descriptor (CKConstant)
 	using CKConstantConstObs = const CKConstant*;
-	/// Pointer to an enumeration constant descriptor
+	/// Safe pointer to an enumeration constant descriptor (CKConstant)
 	using CKConstantConstSafeObs = safe_ptr<const CKConstant>;
 
-	/// Temporary vector of enumeration constant descriptors
+	/// Temporary vector of enumeration constant descriptors (CKConstantConstObs)
 	using CKConstantObsVector = std::vector<CKConstantConstObs>;
 
 	/// Enumeration type descriptor
@@ -613,7 +613,7 @@ namespace cecko {
 		CKConstantObsVector elements_ordered_;
 	};
 
-	/// Array of (function argument) type descriptors
+	/// Array of (function argument) type descriptors (CKTypeObs)
 	using CKTypeObsArray = std::vector<CKTypeObs>;
 
 	/// Function type descriptor
@@ -647,41 +647,41 @@ namespace cecko {
 		CKIRFunctionTypeObs irt_;
 	};
 
-	/// Built-in "void" type descriptor
+	/// Built-in "void" type descriptor (CKVoidType)
 	using CKVoidTypeObs = const CKVoidType*;
-	/// Built-in "void" type descriptor
+	/// Built-in "void" type descriptor (CKVoidType)
 	using CKVoidTypeSafeObs = safe_ptr<const CKVoidType>;
-	/// Built-in "_Bool" type descriptor
+	/// Built-in "_Bool" type descriptor (CKBoolType)
 	using CKBoolTypeObs = const CKBoolType*;
-	/// Built-in "_Bool" type descriptor
+	/// Built-in "_Bool" type descriptor (CKBoolType)
 	using CKBoolTypeSafeObs = safe_ptr<const CKBoolType>;
-	/// Built-in "char" type descriptor
+	/// Built-in "char" type descriptor (CKCharType)
 	using CKCharTypeObs = const CKCharType*;
-	/// Built-in "char" type descriptor
+	/// Built-in "char" type descriptor (CKCharType)
 	using CKCharTypeSafeObs = safe_ptr<const CKCharType>;
-	/// Built-in "int" type descriptor
+	/// Built-in "int" type descriptor (CKIntType)
 	using CKIntTypeObs = const CKIntType*;
-	/// Built-in "int" type descriptor
+	/// Built-in "int" type descriptor (CKIntType)
 	using CKIntTypeSafeObs = safe_ptr<const CKIntType>;
 	/// @cond INTERNAL
 	using CKPtrTypeObs = const CKPtrType*;
 	using CKArrayTypeObs = const CKArrayType*;
 	/// @endcond 
-	/// Pointer type descriptor
+	/// Pointer type descriptor (CKPtrType)
 	using CKPtrTypeSafeObs = safe_ptr<const CKPtrType>;
-	/// Array type descriptor
+	/// Array type descriptor (CKArrayType)
 	using CKArrayTypeSafeObs = safe_ptr<const CKArrayType>;
-	/// Function type descriptor
+	/// Function type descriptor (CKFunctionType)
 	using CKFunctionTypeObs = const CKFunctionType*;
-	/// Function type descriptor
+	/// Function type descriptor (CKFunctionType)
 	using CKFunctionTypeSafeObs = safe_ptr<const CKFunctionType>;
-	/// Struct type descriptor
+	/// Struct type descriptor (CKStructType)
 	using CKStructTypeObs = CKStructType*;
-	/// Struct type descriptor
+	/// Struct type descriptor (CKStructType)
 	using CKStructTypeSafeObs = safe_ptr<CKStructType>;
-	/// Enumeration type descriptor
+	/// Enumeration type descriptor (CKEnumType)
 	using CKEnumTypeObs = CKEnumType*;
-	/// Enumeration type descriptor
+	/// Enumeration type descriptor (CKEnumType)
 	using CKEnumTypeSafeObs = safe_ptr<CKEnumType>;
 
 	/// @cond INTERNAL
@@ -749,9 +749,9 @@ namespace cecko {
 		/// @}
 	};
 
-	/// Pointer to a named-object (constant, variable, or function) descriptor
+	/// Pointer to a named-object (constant, variable, or function) descriptor (CKAbstractNamed)
 	using CKNamedObs = CKAbstractNamed*;
-	/// Safe pointer to a named-object (constant, variable, or function) descriptor
+	/// Safe pointer to a named-object (constant, variable, or function) descriptor (CKAbstractNamed)
 	using CKNamedSafeObs = safe_ptr<CKAbstractNamed,safe_default<CKConstant>>;
 
 	/// Typedef descriptor
@@ -779,9 +779,9 @@ namespace cecko {
 		CKTypeRefPack type_pack_;
 	};
 
-	/// Typedef descriptor
+	/// Typedef descriptor (CKTypedef)
 	using CKTypedefConstObs = const CKTypedef*;
-	/// Typedef descriptor
+	/// Typedef descriptor (CKTypedef)
 	using CKTypedefConstSafeObs = safe_ptr<const CKTypedef>;
 
 	/// Enumeration constant descriptor
@@ -884,7 +884,7 @@ namespace cecko {
 	using CKAbstractScopeObs = CKAbstractScope*;
 	/// @endcond
 
-	/// Temporary array of additional function argument descriptors
+	/// Temporary array of additional function argument descriptors (CKFunctionFormalPack)
 	using CKFunctionFormalPackArray = std::vector< CKFunctionFormalPack>;
 
 	/// Function descriptor
@@ -943,9 +943,9 @@ namespace cecko {
 	};
 	/// @endcond
 
-	/// Function descriptor
+	/// Function descriptor (CKFunction)
 	using CKFunctionObs = CKFunction*;
-	/// Function descriptor
+	/// Function descriptor (CKFunction)
 	using CKFunctionSafeObs = safe_ptr<CKFunction>;
 
 	/// @cond INTERNAL
