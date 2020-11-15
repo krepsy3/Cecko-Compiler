@@ -77,7 +77,7 @@ namespace cecko {
 		return static_cast<context*>(this);
 	}
 
-	CKStructTypeObs CKContext::declare_struct_type(const CIName& n, loc_t loc)
+	CKStructTypeSafeObs CKContext::declare_struct_type(const CIName& n, loc_t loc)
 	{
 		if (!!conflicting_tag_struct(n))
 		{
@@ -85,14 +85,14 @@ namespace cecko {
 		}
 		if (!!loctable_)
 		{
-			return loctable_->declare_struct_type(n, module_->getContext(), loc);
+			return CKStructTypeSafeObs( loctable_->declare_struct_type(n, module_->getContext(), loc));
 		}
 		else
 		{
-			return globtable_->declare_struct_type(n, module_->getContext(), loc);
+			return CKStructTypeSafeObs( globtable_->declare_struct_type(n, module_->getContext(), loc));
 		}
 	}
-	CKStructTypeObs CKContext::define_struct_type_open(const CIName& n, loc_t loc)
+	CKStructTypeSafeObs CKContext::define_struct_type_open(const CIName& n, loc_t loc)
 	{
 		if (!!conflicting_tag_struct(n))
 		{
@@ -112,9 +112,9 @@ namespace cecko {
 			get_ctx()->message(errors::DUPLICATE_STRUCT_DEFINITION, loc, n);
 		}
 		tp->set_def_loc(loc);
-		return tp;
+		return CKStructTypeSafeObs( tp);
 	}
-	CKEnumTypeObs CKContext::declare_enum_type(const CIName& n, loc_t loc)
+	CKEnumTypeSafeObs CKContext::declare_enum_type(const CIName& n, loc_t loc)
 	{
 		if (!!conflicting_tag_enum(n))
 		{
@@ -122,14 +122,14 @@ namespace cecko {
 		}
 		if (!!loctable_)
 		{
-			return loctable_->declare_enum_type(n, get_int_type(), loc);
+			return CKEnumTypeSafeObs(loctable_->declare_enum_type(n, get_int_type(), loc));
 		}
 		else
 		{
-			return globtable_->declare_enum_type(n, get_int_type(), loc);
+			return CKEnumTypeSafeObs(globtable_->declare_enum_type(n, get_int_type(), loc));
 		}
 	}
-	CKEnumTypeObs CKContext::define_enum_type_open(const CIName& n, loc_t loc)
+	CKEnumTypeSafeObs CKContext::define_enum_type_open(const CIName& n, loc_t loc)
 	{
 		if (!!conflicting_tag_enum(n))
 		{
@@ -149,7 +149,7 @@ namespace cecko {
 			get_ctx()->message(errors::DUPLICATE_ENUM_DEFINITION, loc, n);
 		}
 		tp->set_def_loc(loc);	
-		return tp;
+		return CKEnumTypeSafeObs(tp);
 	}
 
 	CKTypedefConstObs CKContext::define_typedef(const std::string& name, const CKTypeRefPack& type_pack, loc_t loc)

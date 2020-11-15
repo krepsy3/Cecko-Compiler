@@ -28,6 +28,10 @@ namespace cecko {
 	/// Pointer to a type descriptor
 	using CKTypeObs = const CIAbstractType*;	// use something smarter for safety
 
+	class CKVoidType;
+	/// Safe pointer to a type descriptor
+	using CKTypeSafeObs = safe_ptr<const CIAbstractType,safe_default< const CKVoidType>>;	// use something smarter for safety
+
 	struct CKTypeRefPack;
 
 	/// @cond INTERNAL
@@ -246,6 +250,31 @@ namespace cecko {
 		bool is_const;		///< Indicates the presence of the *const* flag
 	};
 
+	/// Type descriptor with optional "const" flag
+	struct CKTypeRefSafePack {
+
+		/// Construct as null
+		CKTypeRefSafePack()
+			: type(nullptr), is_const(false)
+		{}
+
+		/// Construct from the arguments
+		CKTypeRefSafePack(CKTypeObs t, bool is_c)
+			: type(t), is_const(is_c)
+		{}
+		/// Convert from unsafe pack
+		explicit CKTypeRefSafePack(const CKTypeRefPack & tp)
+			: type(tp.type), is_const(tp.is_const)
+		{}
+		/// Convert to unsafe pack
+		operator CKTypeRefPack() const
+		{
+			return CKTypeRefPack(type, is_const);
+		}
+		CKTypeSafeObs type;		///< The type
+		bool is_const;			///< Indicates the presence of the *const* flag
+	};
+
 	/// Abstract type descriptor
 	class CIAbstractType : CIImmovable {
 	public:
@@ -275,16 +304,16 @@ namespace cecko {
 		/// @{
 		
 		/// The (optionally const) type a pointer type points to
-		virtual const CKTypeRefPack& get_pointer_points_to() const { assert(0); static CKTypeRefPack nullpack{ nullptr, false }; return nullpack; }
+		virtual CKTypeRefSafePack get_pointer_points_to() const { assert(0); return {nullptr, false}; }
 		/// @}
 
 		/// @name Function properties
 		/// @{
 		
 		/// The return type of a function type
-		virtual CKTypeObs get_function_return_type() const { assert(0); return nullptr; }
+		virtual CKTypeSafeObs get_function_return_type() const { assert(0); return nullptr; }
 		/// The selected argument type of a function type
-		virtual CKTypeObs get_function_arg_type(std::size_t ix) const { return nullptr; }
+		virtual CKTypeSafeObs get_function_arg_type(std::size_t ix) const { return nullptr; }
 		/// The number of arguments of a function type
 		virtual std::size_t get_function_arg_count() const { return 0; }
 		/// Check whether a function type is variadic
@@ -295,7 +324,7 @@ namespace cecko {
 		/// @{
 		
 		/// The element type of an array
-		virtual CKTypeObs get_array_element_type() const { assert(0); return nullptr; }
+		virtual CKTypeSafeObs get_array_element_type() const { assert(0); return nullptr; }
 		/// The size of an array
 		virtual CKIRConstantIntObs get_array_size() const { assert(0); return nullptr; }
 		/// @}
@@ -324,6 +353,9 @@ namespace cecko {
 	class CKVoidType : public CIAbstractType {
 	public:
 		/// @cond INTERNAL
+		CKVoidType()
+			: irt_(nullptr)
+		{}
 		CKVoidType(CKIRContextRef Context)
 			: irt_(CKGetVoidType(Context))
 		{}
@@ -359,6 +391,9 @@ namespace cecko {
 	class CKCharType : public CIAbstractType {
 	public:
 		/// @cond INTERNAL
+		CKCharType()
+			: irt_(nullptr)
+		{}
 		CKCharType(CKIRContextRef Context)
 			: irt_(CKGetInt8Type(Context))
 		{}
@@ -377,6 +412,9 @@ namespace cecko {
 	class CKIntType : public CIAbstractType {
 	public:
 		/// @cond INTERNAL
+		CKIntType()
+			: irt_(nullptr)
+		{}
 		CKIntType(CKIRContextRef Context)
 			: irt_(CKGetInt32Type(Context))
 		{}
@@ -395,6 +433,10 @@ namespace cecko {
 	class CKPtrType : public CIAbstractType {
 	public:
 		/// @cond INTERNAL
+		CKPtrType()
+			: points_to_(nullptr,false), irt_(nullptr)
+		{}
+
 		explicit CKPtrType(const CKTypeRefPack& points_to)
 			: points_to_(points_to), irt_(CKGetPtrType(points_to.type->get_ir()))
 		{}
@@ -407,7 +449,7 @@ namespace cecko {
 		}
 
 		virtual bool is_pointer() const override { return true; }
-		virtual const CKTypeRefPack& get_pointer_points_to() const override { return points_to_; }
+		virtual CKTypeRefSafePack get_pointer_points_to() const override { return CKTypeRefSafePack(points_to_); }
 
 		virtual CITypeMangle mangle() const override { return (points_to_.is_const ? "pc" : "p") + points_to_.type->mangle(); }
 		virtual CIDecl declaration(bool is_const, const CIDecl& dtor) const override;
@@ -421,6 +463,9 @@ namespace cecko {
 	class CKArrayType : public CIAbstractType {
 	public:
 		/// @cond INTERNAL
+		CKArrayType()
+			: element_type_(nullptr), size_(nullptr), irt_(nullptr)
+		{}
 		CKArrayType(CKTypeObs element_type, CKIRConstantIntObs size)
 			: element_type_(element_type), size_(size), irt_(CKGetArrayType(element_type->get_ir(), size))
 		{}
@@ -433,7 +478,7 @@ namespace cecko {
 		}
 
 		virtual bool is_array() const override { return true; }
-		virtual CKTypeObs get_array_element_type() const override { return element_type_; }
+		virtual CKTypeSafeObs get_array_element_type() const override { return CKTypeSafeObs(element_type_); }
 		virtual CKIRConstantIntObs get_array_size() const override { return size_; }
 
 		virtual CITypeMangle mangle() const override { return "a" + std::to_string(size_->getValue().getZExtValue()) + element_type_->mangle(); }
@@ -485,6 +530,9 @@ namespace cecko {
 	class CKStructType : public CIAbstractType, public CINamePtr {
 	public:
 		/// @cond INTERNAL
+		CKStructType()
+			: CINamePtr(0), decl_loc_(0), defined_(false), irt_(nullptr)
+		{}
 		CKStructType(CKIRContextRef Context, const CIName& n, loc_t decl_loc)
 			: CINamePtr(0), decl_loc_(decl_loc), defined_(false), irt_(CKCreateStructType(Context, n))
 		{}
@@ -530,6 +578,9 @@ namespace cecko {
 	class CKEnumType : public CIAbstractType, public CINamePtr {
 	public:
 		/// @cond INTERNAL
+		CKEnumType()
+			: CINamePtr(0), decl_loc_(0), defined_(false), base_type_(nullptr)
+		{}
 		CKEnumType(CKTypeObs base_type, loc_t decl_loc)
 			: CINamePtr(0), decl_loc_(decl_loc), defined_(false), base_type_(base_type)
 		{}
@@ -562,6 +613,9 @@ namespace cecko {
 	class CKFunctionType : public CIAbstractType {
 	public:
 		/// @cond INTERNAL
+		CKFunctionType()
+			: ret_type_(nullptr), variadic_(false), irt_(nullptr)
+		{}
 		CKFunctionType(CKTypeObs ret_type, CKTypeObsArray arg_types, bool variadic = false);
 
 		bool operator==(const CKFunctionType& b) const;
@@ -571,8 +625,8 @@ namespace cecko {
 		virtual CKIRTypeObs get_ir() const override { return irt_; }
 		CKIRFunctionTypeObs get_function_ir() const { return irt_; }
 		virtual bool is_function() const override { return true; }
-		virtual CKTypeObs get_function_return_type() const override { return ret_type_; }
-		virtual CKTypeObs get_function_arg_type(std::size_t ix) const override { return arg_types_[ix]; }
+		virtual CKTypeSafeObs get_function_return_type() const override { return CKTypeSafeObs(ret_type_); }
+		virtual CKTypeSafeObs get_function_arg_type(std::size_t ix) const override { return CKTypeSafeObs(arg_types_[ix]); }
 		virtual std::size_t get_function_arg_count() const override { return arg_types_.size(); }
 		virtual bool is_function_variadic() const override { return variadic_; }
 
@@ -588,22 +642,40 @@ namespace cecko {
 
 	/// Built-in "void" type descriptor
 	using CKVoidTypeObs = const CKVoidType*;
+	/// Built-in "void" type descriptor
+	using CKVoidTypeSafeObs = safe_ptr<const CKVoidType>;
 	/// Built-in "_Bool" type descriptor
 	using CKBoolTypeObs = const CKBoolType*;
+	/// Built-in "_Bool" type descriptor
+	using CKBoolTypeSafeObs = safe_ptr<const CKBoolType>;
 	/// Built-in "char" type descriptor
 	using CKCharTypeObs = const CKCharType*;
+	/// Built-in "char" type descriptor
+	using CKCharTypeSafeObs = safe_ptr<const CKCharType>;
 	/// Built-in "int" type descriptor
 	using CKIntTypeObs = const CKIntType*;
+	/// Built-in "int" type descriptor
+	using CKIntTypeSafeObs = safe_ptr<const CKIntType>;
 	/// @cond INTERNAL
 	using CKPtrTypeObs = const CKPtrType*;
 	using CKArrayTypeObs = const CKArrayType*;
 	/// @endcond 
+	/// Pointer type descriptor
+	using CKPtrTypeSafeObs = safe_ptr<const CKPtrType>;
+	/// Array type descriptor
+	using CKArrayTypeSafeObs = safe_ptr<const CKArrayType>;
 	/// Function type descriptor
 	using CKFunctionTypeObs = const CKFunctionType*;
+	/// Function type descriptor
+	using CKFunctionTypeSafeObs = safe_ptr<const CKFunctionType>;
 	/// Struct type descriptor
 	using CKStructTypeObs = CKStructType*;
+	/// Struct type descriptor
+	using CKStructTypeSafeObs = safe_ptr<CKStructType>;
 	/// Enumeration type descriptor
 	using CKEnumTypeObs = CKEnumType*;
+	/// Enumeration type descriptor
+	using CKEnumTypeSafeObs = safe_ptr<CKEnumType>;
 
 	/// @cond INTERNAL
 	class CKTypeTable : CIImmovable {
@@ -655,7 +727,7 @@ namespace cecko {
 		/// @{
 		 
 		/// Type of the named object
-		virtual CKTypeObs get_type() const = 0;
+		virtual CKTypeSafeObs get_type() const = 0;
 		/// Optional "const" flag on a variable
 		virtual bool is_const() const { return false; }
 		/// @}
@@ -686,7 +758,7 @@ namespace cecko {
 		//bool is_const() const { return type_pack_.is_const; }
 		
 		/// The type and the optional "const" represented by the typedef
-		const CKTypeRefPack& get_type_pack() const { return type_pack_; }
+		CKTypeRefSafePack get_type_pack() const { return CKTypeRefSafePack(type_pack_); }
 
 		/// @cond INTERNAL
 		void dump(CIOStream& os) const;
@@ -706,7 +778,7 @@ namespace cecko {
 			: CKAbstractNamed(def_loc), type_pack_(type, true), value_(value)
 		{}
 		virtual bool is_constant() const override { return true; }
-		virtual CKTypeObs get_type() const override { return type_pack_.type; }
+		virtual CKTypeSafeObs get_type() const override { return CKTypeSafeObs(type_pack_.type); }
 		virtual bool is_const() const override { return type_pack_.is_const; }
 		//const CKTypeRefPack& get_type_pack() const { return type_pack_; }
 		/// @endcond
@@ -731,7 +803,7 @@ namespace cecko {
 		{}
 		/// @endcond
 		virtual bool is_var() const override { return true; }
-		virtual CKTypeObs get_type() const override { return type_pack_.type; }
+		virtual CKTypeSafeObs get_type() const override { return CKTypeSafeObs(type_pack_.type); }
 		virtual bool is_const() const override { return type_pack_.is_const; }
 		//const CKTypeRefPack& get_type_pack() const { return type_pack_; }
 		/// @cond INTERNAL
@@ -810,7 +882,7 @@ namespace cecko {
 		/// Check whether the function is already defined
 		bool is_defined() const { return !!loctab_; }
 
-		virtual CKTypeObs get_type() const override { return type_; }
+		virtual CKTypeSafeObs get_type() const override { return CKTypeSafeObs(type_); }
 		CKFunctionTypeObs get_function_type() const { return type_; }
 		virtual CKIRValueObs get_ir() const override { return irf_; }
 		virtual CKIRFunctionObs get_function_ir() const override { return irf_; }
@@ -1026,33 +1098,33 @@ namespace cecko {
 		/// @{
 		
 		/// The built-in "void" type descriptor
-		CKVoidTypeObs get_void_type() const { return typetable_->get_void_type(); }
+		CKVoidTypeSafeObs get_void_type() const { return CKVoidTypeSafeObs(typetable_->get_void_type()); }
 		/// The built-in "_Bool" type descriptor
-		CKBoolTypeObs get_bool_type() const { return typetable_->get_bool_type(); }
+		CKBoolTypeSafeObs get_bool_type() const { return CKBoolTypeSafeObs(typetable_->get_bool_type()); }
 		/// The built-in "char" type descriptor
-		CKCharTypeObs get_char_type() const { return typetable_->get_char_type(); }
+		CKCharTypeSafeObs get_char_type() const { return CKCharTypeSafeObs(typetable_->get_char_type()); }
 		/// The built-in "int" type descriptor
-		CKIntTypeObs get_int_type() const { return typetable_->get_int_type(); }
+		CKIntTypeSafeObs get_int_type() const { return CKIntTypeSafeObs(typetable_->get_int_type()); }
 		/// @}
 
 		/// @name Creating unnamed types
 		/// @{
 
 		/// A pointer type descriptor
-		CKPtrTypeObs get_pointer_type(const CKTypeRefPack& pack) { return typetable_->get_pointer_type(pack); }
+		CKPtrTypeSafeObs get_pointer_type(const CKTypeRefPack& pack) { return CKPtrTypeSafeObs(typetable_->get_pointer_type(pack)); }
 		/// An array type descriptor
-		CKArrayTypeObs get_array_type(CKTypeObs element_type, CKIRConstantIntObs size);
+		CKArrayTypeSafeObs get_array_type(CKTypeObs element_type, CKIRConstantIntObs size);
 		/// A function type descriptor
-		CKFunctionTypeObs get_function_type(CKTypeObs ret_type, CKTypeObsArray arg_types, bool variadic = false);
+		CKFunctionTypeSafeObs get_function_type(CKTypeObs ret_type, CKTypeObsArray arg_types, bool variadic = false);
 		/// @}
 
 		/// @name Named struct types
 		/// @{
 		
 		/// Reference or declare a struct type
-		CKStructTypeObs declare_struct_type(const CIName& n, loc_t loc);
+		CKStructTypeSafeObs declare_struct_type(const CIName& n, loc_t loc);
 		/// Signalize entering the definition of the struct type named n
-		CKStructTypeObs define_struct_type_open(const CIName& n, loc_t loc);
+		CKStructTypeSafeObs define_struct_type_open(const CIName& n, loc_t loc);
 		/// Signalize exiting the definition of the struct type type
 		void define_struct_type_close(CKStructTypeObs type, const CKStructItemArray& items);
 		/// @}
@@ -1061,9 +1133,9 @@ namespace cecko {
 		/// @{
 
 		/// Reference or declare an enum type
-		CKEnumTypeObs declare_enum_type(const CIName& n, loc_t loc);
+		CKEnumTypeSafeObs declare_enum_type(const CIName& n, loc_t loc);
 		/// Signalize entering the definition of the enum type named n
-		CKEnumTypeObs define_enum_type_open(const CIName& n, loc_t loc);
+		CKEnumTypeSafeObs define_enum_type_open(const CIName& n, loc_t loc);
 		/// Signalize exiting the definition of the enum type type
 		void define_enum_type_close(CKEnumTypeObs type, CKConstantObsVector items);
 		/// @}

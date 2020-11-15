@@ -618,17 +618,17 @@ namespace cecko {
 		}
 	}
 
-	CKArrayTypeObs CKContext::get_array_type(CKTypeObs element_type, CKIRConstantIntObs size) 
+	CKArrayTypeSafeObs CKContext::get_array_type(CKTypeObs element_type, CKIRConstantIntObs size) 
 	{ 
 		if (element_type->is_void() || element_type->is_function())
 		{
 			// cannot create array of void/function
 			return nullptr;
 		}
-		return typetable_->get_array_type(element_type, size); 
+		return CKArrayTypeSafeObs(typetable_->get_array_type(element_type, size));
 	}
 	
-	CKFunctionTypeObs CKContext::get_function_type(CKTypeObs ret_type, CKTypeObsArray arg_types, bool variadic) 
+	CKFunctionTypeSafeObs CKContext::get_function_type(CKTypeObs ret_type, CKTypeObsArray arg_types, bool variadic) 
 	{ 
 		if (ret_type->is_array() || ret_type->is_function())
 		{
@@ -644,7 +644,7 @@ namespace cecko {
 				return nullptr;
 			}
 		}
-		return typetable_->get_function_type(ret_type, std::move(arg_types), variadic);
+		return CKFunctionTypeSafeObs( typetable_->get_function_type(ret_type, std::move(arg_types), variadic));
 	}
 
 	void CKTables::declare_library()

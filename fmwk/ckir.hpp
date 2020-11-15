@@ -35,6 +35,28 @@ A wrapper over LLVM IR.
 #include <cstdio>
 
 namespace cecko {
+
+	template< typename E>
+	struct safe_default
+	{
+		E operator()() const { return E(); }
+	};
+
+	template< typename E, typename DF = safe_default<E>>
+	class safe_ptr
+	{
+	public:
+		safe_ptr() : p_(nullptr) {}
+		safe_ptr(std::nullptr_t) : p_(nullptr) {}
+		explicit safe_ptr(E* p) : p_(p) {}
+		operator E* () const { return p_; }
+		E& operator*() const { return p_ ? *p_ : dummy(); }
+		E* operator->() const { return p_ ? p_ : &dummy(); }
+	private:
+		E* p_;
+		static E& dummy() { static decltype(DF()()) d = DF()(); return d; }
+	};
+
 	// numbers
 	using CKIRAPInt = llvm::APInt;	///< @sa <a href="http://llvm.org/doxygen/classllvm_1_1APInt.html">llvm::APInt</a>
 	// context
