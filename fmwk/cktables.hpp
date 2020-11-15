@@ -233,6 +233,8 @@ namespace cecko {
 
 	/// Pointer to a struct element descriptor
 	using CKStructElementObs = const CKStructElement*;
+	/// Pointer to a struct element descriptor
+	using CKStructElementSafeObs = safe_ptr<const CKStructElement>;
 
 	/// Type descriptor with optional "const" flag
 	struct CKTypeRefPack {
@@ -333,7 +335,7 @@ namespace cecko {
 		/// @{
 		
 		/// Find a struct type element by name
-		virtual CKStructElementObs find_struct_element(const CIName&) const { assert(0); return nullptr; }
+		virtual CKStructElementSafeObs find_struct_element(const CIName&) const { assert(0); return nullptr; }
 		/// @}
 
 		/// @cond INTERNAL
@@ -494,6 +496,9 @@ namespace cecko {
 	class CKStructElement : public CINamePtr, CIImmovable {
 	public:
 		/// @cond INTERNAL
+		explicit CKStructElement()
+			: CINamePtr(0), pack_(nullptr, false), idx_(0)
+		{}
 		explicit CKStructElement(const CKTypeRefPack& pack, unsigned int idx, loc_t def_loc)
 			: CINamePtr(def_loc), pack_(pack), idx_(idx)
 		{}
@@ -547,10 +552,10 @@ namespace cecko {
 		bool is_defined() const { return defined_; }
 
 		/// @cond INTERNAL
-		virtual CKStructElementObs find_struct_element(const CIName& n) const override
+		virtual CKStructElementSafeObs find_struct_element(const CIName& n) const override
 		{
 			assert(defined_);
-			return elements_.find(n);
+			return CKStructElementSafeObs(elements_.find(n));
 		}
 
 		virtual CITypeMangle mangle() const override { return "S" + get_name() + '$'; }
@@ -570,6 +575,8 @@ namespace cecko {
 
 	/// Pointer to an enumeration constant descriptor
 	using CKConstantConstObs = const CKConstant*;
+	/// Pointer to an enumeration constant descriptor
+	using CKConstantConstSafeObs = safe_ptr<const CKConstant>;
 
 	/// Temporary vector of enumeration constant descriptors
 	using CKConstantObsVector = std::vector<CKConstantConstObs>;
@@ -744,11 +751,16 @@ namespace cecko {
 
 	/// Pointer to a named-object (constant, variable, or function) descriptor
 	using CKNamedObs = CKAbstractNamed*;
+	/// Safe pointer to a named-object (constant, variable, or function) descriptor
+	using CKNamedSafeObs = safe_ptr<CKAbstractNamed,safe_default<CKConstant>>;
 
 	/// Typedef descriptor
 	class CKTypedef : public CINamePtr, CIImmovable {
 	public:
 		/// @cond INTERNAL
+		CKTypedef()
+			: CINamePtr(0), type_pack_(nullptr, false)
+		{}
 		CKTypedef(CKTypeRefPack type_pack, loc_t def_loc)
 			: CINamePtr(def_loc), type_pack_(type_pack)
 		{}
@@ -769,11 +781,16 @@ namespace cecko {
 
 	/// Typedef descriptor
 	using CKTypedefConstObs = const CKTypedef*;
+	/// Typedef descriptor
+	using CKTypedefConstSafeObs = safe_ptr<const CKTypedef>;
 
 	/// Enumeration constant descriptor
 	class CKConstant : public CKAbstractNamed {
 	public:
 		/// @cond INTERNAL
+		CKConstant()
+			: CKAbstractNamed(0), type_pack_(nullptr, true), value_(nullptr)
+		{}
 		CKConstant(CKTypeObs type, CKIRConstantIntObs value, loc_t def_loc)
 			: CKAbstractNamed(def_loc), type_pack_(type, true), value_(value)
 		{}
@@ -928,6 +945,8 @@ namespace cecko {
 
 	/// Function descriptor
 	using CKFunctionObs = CKFunction*;
+	/// Function descriptor
+	using CKFunctionSafeObs = safe_ptr<CKFunction>;
 
 	/// @cond INTERNAL
 	using CKFunctionConstObs = const CKFunction*;
@@ -1151,31 +1170,31 @@ namespace cecko {
 		/// @{
 
 		/// Define a typedef
-		CKTypedefConstObs define_typedef(const CIName& name, const CKTypeRefPack& type_pack, loc_t loc);
+		CKTypedefConstSafeObs define_typedef(const CIName& name, const CKTypeRefPack& type_pack, loc_t loc);
 		/// @}
 
 		/// @name Enumeration constants
 		/// @{
 
 		/// Define an enumeration constant
-		CKConstantConstObs define_constant(const CIName& name, CKIRConstantIntObs value, loc_t loc);
+		CKConstantConstSafeObs define_constant(const CIName& name, CKIRConstantIntObs value, loc_t loc);
 		/// @}
 
 		/// @name Functions
 		/// @{
 
 		/// Declare a function (with or without body)
-		CKFunctionObs declare_function(const CIName& n, CKTypeObs type, loc_t loc);
+		CKFunctionSafeObs declare_function(const CIName& n, CKTypeObs type, loc_t loc);
 		/// @}
 
 		/// @name Finding named objects
 		/// @{
 
 		/// Find a named (constant, variable, or function) object
-		CKNamedObs find(const CIName& n);
+		CKNamedSafeObs find(const CIName& n);
 
 		/// Find a typedef
-		CKTypedefConstObs find_typedef(const CIName& n) const;
+		CKTypedefConstSafeObs find_typedef(const CIName& n) const;
 		/// @}
 
 		/// @name Determination of typedefs in lexer

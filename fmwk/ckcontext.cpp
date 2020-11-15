@@ -152,7 +152,7 @@ namespace cecko {
 		return CKEnumTypeSafeObs(tp);
 	}
 
-	CKTypedefConstObs CKContext::define_typedef(const std::string& name, const CKTypeRefPack& type_pack, loc_t loc)
+	CKTypedefConstSafeObs CKContext::define_typedef(const std::string& name, const CKTypeRefPack& type_pack, loc_t loc)
 	{
 		if (!!conflicting_idf(name))
 		{
@@ -160,14 +160,14 @@ namespace cecko {
 		}
 		if (!!loctable_)
 		{
-			return loctable_->declare_typedef(name, type_pack, loc);
+			return CKTypedefConstSafeObs(loctable_->declare_typedef(name, type_pack, loc));
 		}
 		else
 		{
-			return globtable_->declare_typedef(name, type_pack, loc);
+			return CKTypedefConstSafeObs(globtable_->declare_typedef(name, type_pack, loc));
 		}
 	}
-	CKConstantConstObs CKContext::define_constant(const std::string& name, CKIRConstantIntObs value, loc_t loc)
+	CKConstantConstSafeObs CKContext::define_constant(const std::string& name, CKIRConstantIntObs value, loc_t loc)
 	{
 		if (!!conflicting_idf(name))
 		{
@@ -175,11 +175,11 @@ namespace cecko {
 		}
 		if (!!loctable_)
 		{
-			return loctable_->declare_constant(name, get_int_type(), value, loc);
+			return CKConstantConstSafeObs( loctable_->declare_constant(name, get_int_type(), value, loc));
 		}
 		else
 		{
-			return globtable_->declare_constant(name, get_int_type(), value, loc);
+			return CKConstantConstSafeObs( globtable_->declare_constant(name, get_int_type(), value, loc));
 		}
 	}
 	void CKContext::define_var(const std::string& name, const CKTypeRefPack& type_pack, loc_t loc)
@@ -204,7 +204,7 @@ namespace cecko {
 		}
 	}
 
-	CKFunctionObs CKContext::declare_function(const CIName& n, CKTypeObs type, loc_t loc)
+	CKFunctionSafeObs CKContext::declare_function(const CIName& n, CKTypeObs type, loc_t loc)
 	{
 		if (!type->is_function())
 		{
@@ -217,7 +217,7 @@ namespace cecko {
 			get_ctx()->message(errors::DUPLICATE_IDF, loc, n);
 		}
 
-		return globtable_->declare_function(n, module_, function_type, loc);
+		return CKFunctionSafeObs(globtable_->declare_function(n, module_, function_type, loc));
 	}
 
 	void CKContext::enter_function(CKFunctionObs f, CKFunctionFormalPackArray pack, loc_t loc)

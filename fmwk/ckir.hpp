@@ -50,8 +50,11 @@ namespace cecko {
 		safe_ptr(std::nullptr_t) : p_(nullptr) {}
 		explicit safe_ptr(E* p) : p_(p) {}
 		operator E* () const { return p_; }
+		operator bool() const { return !!p_; }
 		E& operator*() const { return p_ ? *p_ : dummy(); }
 		E* operator->() const { return p_ ? p_ : &dummy(); }
+		friend bool operator==(const safe_ptr& a, const safe_ptr& b) { return a.p_ == b.p_; }
+		friend bool operator!=(const safe_ptr& a, const safe_ptr& b) { return a.p_ != b.p_; }
 	private:
 		E* p_;
 		static E& dummy() { static decltype(DF()()) d = DF()(); return d; }

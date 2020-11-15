@@ -582,27 +582,27 @@ namespace cecko {
 		type->finalize(std::move(items));
 	}
 
-	CKNamedObs CKContext::find(const CIName& n)
+	CKNamedSafeObs CKContext::find(const CIName& n)
 	{
 		if (!!loctable_)
 		{
-			return loctable_->find(n);
+			return CKNamedSafeObs(loctable_->find(n));
 		}
 		else
 		{
-			return globtable_->find(n);
+			return CKNamedSafeObs(globtable_->find(n));
 		}
 	}
 
-	CKTypedefConstObs CKContext::find_typedef(const CIName& n) const
+	CKTypedefConstSafeObs CKContext::find_typedef(const CIName& n) const
 	{
 		if (!!loctable_)
 		{
-			return loctable_->find_typedef(n);
+			return CKTypedefConstSafeObs(loctable_->find_typedef(n));
 		}
 		else
 		{
-			return globtable_->find_typedef(n);
+			return CKTypedefConstSafeObs(globtable_->find_typedef(n));
 		}
 	}
 
