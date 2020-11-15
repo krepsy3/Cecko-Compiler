@@ -226,7 +226,7 @@ namespace cecko {
 	{
 		return constants_.find(n);
 	}
-	CKNamedObs CKGlobalTable::find(const CIName& n)
+	CKNamedObs CKGlobalTable::find_here(const CIName& n)
 	{
 		auto pc = find_constant_here(n);
 		if (pc)
@@ -236,6 +236,23 @@ namespace cecko {
 			return q;
 		auto p = fncs_.find(n);
 		return p;
+	}
+	bool CKGlobalTable::conflicting_idf(const CIName& n)
+	{
+		return find_idf_here_universal(n) || !!vars_.find(n) || !!fncs_.find(n);
+	}
+
+	bool CKGlobalTable::conflicting_idf_function(const CIName& n, CKFunctionTypeObs type)
+	{
+		if (find_idf_here_universal(n) || !!vars_.find(n))
+			return true;
+		auto p = fncs_.find(n);
+		return !!p && p->get_function_type() != type;
+	}
+
+	CKNamedObs CKGlobalTable::find(const CIName& n)
+	{
+		return find_here(n);
 	}
 
 	void CKGlobalTable::dump(CIOStream& os) const
@@ -325,14 +342,23 @@ namespace cecko {
 			return p;
 		return parent_scope_->find_typedef(n);
 	}
-	CKNamedObs CKLocalTable::find(const CIName& n)
+	CKNamedObs CKLocalTable::find_here(const CIName& n)
 	{
 		auto pc = find_constant_here(n);
 		if (pc)
 			return pc;
 		auto pv = vars_.find(n);
-		if (pv)
-			return pv;
+		return pv;
+	}
+	bool CKLocalTable::conflicting_idf(const CIName& n)
+	{
+		return find_idf_here_universal(n) || !!vars_.find(n);
+	}
+	CKNamedObs CKLocalTable::find(const CIName& n)
+	{
+		auto p = find_here(n);
+		if (p)
+			return p;
 		return parent_scope_->find(n);
 	}
 	CKLocalTableObs CKLocalTable::get_local()
@@ -349,6 +375,21 @@ namespace cecko {
 	CKLocalTableObs CKLocalTable::parent_block() const
 	{
 		return parent_scope_->get_local();
+	}
+
+	bool CKUniversalTable::conflicting_tag_enum(const CIName& n)
+	{
+		return !!strts_.find(n);
+	}
+
+	bool CKUniversalTable::conflicting_tag_struct(const CIName& n)
+	{
+		return !!enmts_.find(n);
+	}
+
+	bool CKUniversalTable::find_idf_here_universal(const CIName& n)
+	{
+		return !!typedefs_.find(n) || !!constants_.find(n);
 	}
 
 	void CKUniversalTable::dump_universal(CIOStream& os, const std::string& indent) const
@@ -469,17 +510,6 @@ namespace cecko {
 	{
 	}
 
-	void CKContext::enter_function(CKFunctionObs f, CKFunctionFormalPackArray pack, loc_t loc)
-	{
-		assert(!loctable_);
-		// FUNCTION PROLOG
-		auto BB0 = CKCreateBasicBlock("prolog", f->get_function_ir());
-		alloca_builder_.SetInsertPoint(BB0);
-		loctable_ = f->define(globtable_, alloca_builder_, std::move(pack));
-		start_bb_ = CKCreateBasicBlock("start", f->get_function_ir());
-		builder_.SetInsertPoint(start_bb_);
-	}
-
 	void CKContext::exit_function()
 	{
 		assert(loctable_);
@@ -503,99 +533,55 @@ namespace cecko {
 		assert(loctable_);
 	}
 
-	CKStructTypeObs CKContext::declare_struct_type(const CIName& n, loc_t loc)
+	bool CKContext::conflicting_tag_enum(const std::string& name)
 	{
 		if (!!loctable_)
 		{
-			return loctable_->declare_struct_type(n, module_->getContext(), loc);
+			return loctable_->conflicting_tag_enum(name);
 		}
 		else
 		{
-			return globtable_->declare_struct_type(n, module_->getContext(), loc);
+			return globtable_->conflicting_tag_enum(name);
 		}
 	}
-	CKStructTypeObs CKContext::define_struct_type_open(const CIName& n, loc_t loc)
-	{ 
-		CKStructTypeObs tp;
+	bool CKContext::conflicting_tag_struct(const std::string& name)
+	{
 		if (!!loctable_)
 		{
-			tp = loctable_->declare_struct_type_here(n, module_->getContext(), loc);
+			return loctable_->conflicting_tag_struct(name);
 		}
 		else
 		{
-			tp = globtable_->declare_struct_type_here(n, module_->getContext(), loc);
+			return globtable_->conflicting_tag_struct(name);
 		}
-		tp->set_def_loc(loc);	// !!! DUPLICITE DEFINITION ???
-		return tp;
 	}
+	bool CKContext::conflicting_idf(const std::string& name)
+	{
+		if (!!loctable_)
+		{
+			return loctable_->conflicting_idf(name);
+		}
+		else
+		{
+			return globtable_->conflicting_idf(name);
+		}
+	}
+
+	bool CKContext::conflicting_idf_function(const CIName& name, CKFunctionTypeObs type)
+	{
+		return globtable_->conflicting_idf_function(name, type);
+	}
+
 	void CKContext::define_struct_type_close(CKStructTypeObs type, const CKStructItemArray& items)
 	{
 		type->finalize(items);
 	}
 
-	CKEnumTypeObs CKContext::declare_enum_type(const CIName& n, loc_t loc)
-	{
-		if (!!loctable_)
-		{
-			return loctable_->declare_enum_type(n, get_int_type(), loc);
-		}
-		else
-		{
-			return globtable_->declare_enum_type(n, get_int_type(), loc);
-		}
-	}
-	CKEnumTypeObs CKContext::define_enum_type_open(const CIName& n, loc_t loc)
-	{ 
-		CKEnumTypeObs tp;
-		if (!!loctable_)
-		{
-			tp = loctable_->declare_enum_type_here(n, get_int_type(), loc);
-		}
-		else
-		{
-			tp = globtable_->declare_enum_type_here(n, get_int_type(), loc);
-		}
-		tp->set_def_loc(loc);	// !!! DUPLICITE DEFINITION ???
-		return tp;
-	}
 	void CKContext::define_enum_type_close(CKEnumTypeObs type, CKConstantObsVector items)
 	{
 		type->finalize(std::move(items));
 	}
 
-	CKTypedefConstObs CKContext::define_typedef(const std::string& name, const CKTypeRefPack& type_pack, loc_t loc)
-	{
-		if (!!loctable_)
-		{
-			return loctable_->declare_typedef(name, type_pack, loc);
-		}
-		else
-		{
-			return globtable_->declare_typedef(name, type_pack, loc);
-		}
-	}
-	CKConstantConstObs CKContext::define_constant(const std::string& name, CKIRConstantIntObs value, loc_t loc)
-	{
-		if (!!loctable_)
-		{
-			return loctable_->declare_constant(name, get_int_type(), value, loc);
-		}
-		else
-		{
-			return globtable_->declare_constant(name, get_int_type(), value, loc);
-		}
-	}
-	void CKContext::define_var(const std::string& name, const CKTypeRefPack& type_pack, loc_t loc)
-	{
-		if (!!loctable_)
-		{
-			loctable_->varDefine(alloca_builder_, name, type_pack, loc);
-		}
-		else
-		{
-			globtable_->varDefine(module_, name, type_pack, loc);
-		}
-	}
 	CKNamedObs CKContext::find(const CIName& n)
 	{
 		if (!!loctable_)
@@ -630,6 +616,35 @@ namespace cecko {
 		{
 			return !! globtable_->find_typedef(n);
 		}
+	}
+
+	CKArrayTypeObs CKContext::get_array_type(CKTypeObs element_type, CKIRConstantIntObs size) 
+	{ 
+		if (element_type->is_void() || element_type->is_function())
+		{
+			// cannot create array of void/function
+			return nullptr;
+		}
+		return typetable_->get_array_type(element_type, size); 
+	}
+	
+	CKFunctionTypeObs CKContext::get_function_type(CKTypeObs ret_type, CKTypeObsArray arg_types, bool variadic) 
+	{ 
+		if (ret_type->is_array() || ret_type->is_function())
+		{
+			// cannot return array/function
+			return nullptr;
+		}
+		for (auto&& a : arg_types)
+		{
+			if (a->is_void() || a->is_array() || a->is_function())
+			{
+				// cannot pass void/array/function
+				// note: Cecko does not support implicit array/function-to-pointer conversion on argument declarations
+				return nullptr;
+			}
+		}
+		return typetable_->get_function_type(ret_type, std::move(arg_types), variadic);
 	}
 
 	void CKTables::declare_library()

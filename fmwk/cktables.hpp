@@ -730,9 +730,9 @@ namespace cecko {
 			: CKAbstractNamed(def_loc), type_pack_(type_pack)
 		{}
 		/// @endcond
-		virtual bool is_var() const { return true; }
-		virtual CKTypeObs get_type() const { return type_pack_.type; }
-		virtual bool is_const() const { return type_pack_.is_const; }
+		virtual bool is_var() const override { return true; }
+		virtual CKTypeObs get_type() const override { return type_pack_.type; }
+		virtual bool is_const() const override { return type_pack_.is_const; }
 		//const CKTypeRefPack& get_type_pack() const { return type_pack_; }
 		/// @cond INTERNAL
 		void dump(CIOStream& os, const std::string& indent) const;
@@ -748,7 +748,7 @@ namespace cecko {
 		CKGlobalVar(CKTypeRefPack type_pack, CKIRConstantObs address, loc_t def_loc)
 			: CKVar(type_pack, def_loc), address_(address)
 		{}
-		virtual CKIRValueObs get_ir() const { return address_; }
+		virtual CKIRValueObs get_ir() const override { return address_; }
 		CKIRConstantObs get_address() const { return address_; }
 		/// @endcond
 	private:
@@ -842,6 +842,9 @@ namespace cecko {
 		CKConstantConstObs declare_constant(const CIName& name, CKTypeObs type, CKIRConstantIntObs value, loc_t def_loc);
 		CKTypedefConstObs find_typedef_here(const CIName& n) const;
 		CKNamedObs find_constant_here(const CIName& n);
+		bool conflicting_tag_enum(const std::string& name);
+		bool conflicting_tag_struct(const std::string& name);
+		bool find_idf_here_universal(const CIName& n);
 		void dump_universal(CIOStream& os, const std::string& indent) const;
 	private:
 		CINamedStorage< CKStructType> strts_;
@@ -877,8 +880,11 @@ namespace cecko {
 		CKFunctionObs declare_function(const CIName& n, CKIRModuleObs M, CKFunctionTypeObs type, const CIName& irname);
 		CKFunctionObs find_function(const CIName& n);
 		CKFunctionConstObs find_function(const CIName& n) const;
-		virtual CKTypedefConstObs find_typedef(const CIName& n) const;
-		virtual CKNamedObs find(const CIName& n);
+		virtual CKTypedefConstObs find_typedef(const CIName& n) const override;
+		virtual CKNamedObs find(const CIName& n) override;
+		CKNamedObs find_here(const CIName& n);
+		bool conflicting_idf(const CIName& n);
+		bool conflicting_idf_function(const CIName& n, CKFunctionTypeObs type);
 
 		void dump(CIOStream& os) const;
 	private:
@@ -894,7 +900,7 @@ namespace cecko {
 		CKLocalVar(CKTypeRefPack type_pack, CKIRAllocaInstObs address, loc_t def_loc, bool is_arg)
 			: CKVar(type_pack, def_loc), address_(address), is_arg_(is_arg)
 		{}
-		virtual CKIRValueObs get_ir() const { return address_; }
+		virtual CKIRValueObs get_ir() const override { return address_; }
 		CKIRAllocaInstObs get_address() const { return address_; }
 		bool is_arg() const { return is_arg_; }
 		/// @endcond
@@ -921,12 +927,14 @@ namespace cecko {
 
 		CKLocalVarObs varDefine(CKIRBuilderRef builder, const CIName& name, const CKTypeRefPack& type_pack, loc_t def_loc);
 
-		virtual CKTypedefConstObs find_typedef(const CIName& n) const;
-		virtual CKNamedObs find(const CIName& n);
+		virtual CKTypedefConstObs find_typedef(const CIName& n) const override;
+		virtual CKNamedObs find(const CIName& n) override;
+		CKNamedObs find_here(const CIName& n);
+		bool conflicting_idf(const CIName& n);
 
 		void dump(CIOStream& os, const std::string & indent) const;
 
-		virtual CKLocalTableObs get_local();
+		virtual CKLocalTableObs get_local() override;
 
 		CKLocalTableObs create_block();
 		CKLocalTableObs parent_block() const;
@@ -993,6 +1001,8 @@ namespace cecko {
 	using CKTablesObs = CKTables*;
 	/// @endcond
 
+	class context;
+
 	/// Semantic layer of compiler context
 	struct CKContext {
 		/// @cond INTERNAL
@@ -1031,9 +1041,9 @@ namespace cecko {
 		/// A pointer type descriptor
 		CKPtrTypeObs get_pointer_type(const CKTypeRefPack& pack) { return typetable_->get_pointer_type(pack); }
 		/// An array type descriptor
-		CKArrayTypeObs get_array_type(CKTypeObs element_type, CKIRConstantIntObs size) { return typetable_->get_array_type(element_type, size); }
+		CKArrayTypeObs get_array_type(CKTypeObs element_type, CKIRConstantIntObs size);
 		/// A function type descriptor
-		CKFunctionTypeObs get_function_type(CKTypeObs ret_type, CKTypeObsArray arg_types, bool variadic = false) { return typetable_->get_function_type(ret_type, std::move(arg_types), variadic); }
+		CKFunctionTypeObs get_function_type(CKTypeObs ret_type, CKTypeObsArray arg_types, bool variadic = false);
 		/// @}
 
 		/// @name Named struct types
@@ -1083,10 +1093,7 @@ namespace cecko {
 		/// @{
 
 		/// Declare a function (with or without body)
-		CKFunctionObs declare_function(const CIName& n, CKFunctionTypeObs type, loc_t loc)
-		{
-			return globtable_->declare_function(n, module_, type, loc);
-		}
+		CKFunctionObs declare_function(const CIName& n, CKTypeObs type, loc_t loc);
 		/// @}
 
 		/// @name Finding named objects
@@ -1147,6 +1154,11 @@ namespace cecko {
 		{
 			return data_layout_;
 		}
+
+		bool conflicting_idf(const std::string& name);
+		bool conflicting_idf_function(const std::string& name, CKFunctionTypeObs type);
+		bool conflicting_tag_enum(const std::string& name);
+		bool conflicting_tag_struct(const std::string& name);
 		/// @endcond
 	private:
 		CKTypeTableObs typetable_;
@@ -1158,6 +1170,8 @@ namespace cecko {
 		CKIRBuilder builder_;
 		CKIRBasicBlockObs start_bb_;
 		CKIRDataLayoutObs data_layout_;
+
+		context* get_ctx();
 	};
 }
 
