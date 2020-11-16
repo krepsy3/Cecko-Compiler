@@ -61,27 +61,43 @@ ctx->define_var("x", CKTypeRefPack(tp3, is_const3), loc);
 Your job is to arrange a temporary structure which will allow you to execute the sequence of `get_pointer_type` and `get_array_type` in the right moment (when you have the `tp1` at hand).
 In addition, if the last type (`tp3`) were a function, you have to call `declare_function` instead of `define_var`. And if there were a `typedef` keyword, you call `define_typedef` instead.
 
-### Jaké chyby máme ohlašovat, pokud declaration-specifiers obsahuje nekompatibilní nebo zduplikované specifiery (resp. qualifiery)? Něco jako const const int i; nebo bool int i;.
+### What if declaration-specifiers contain conflicting or duplicate specifiers or qualifiers? E.g. const const int i; bool int i;.
 
-Ohlaste `errors::INVALID_SPECIFIERS` v techto pripadech: `FILE int`, `char int`, `const x;`, `typedef T;`, `typedef int f() { /.../ }`, `int f(typedef int x)`. 
+It is your responsibility to report `errors::INVALID_SPECIFIERS` in cases like these: 
+\code{.cpp}
+FILE int v1;
+char int v2;
+const v3;
+typedef T4;
+typedef int f5() { /.../ }
+int f6(typedef int x);
+\endcode
 
-Pripad `const const int`  nebo `typedef const int T; const T` nepovazujeme v Cecku za chybu.
+On the other hand, double `const` like in 
+\code{.cpp}
+const const int v7;
+typedef const int T8; 
+const T8 v9;
+\endcode
+is not considered an error in Cecko (although `v7` would be an error in C) - it is silently collapsed into one `const` flag.
 
-### Je sémanticky správně deklarace int func(bool b)[];? Gramatika ji umožňuje a mělo by jít o deklaraci funkce func  s návratovou hodnotou int[] . Nikde jsem ale nenašel, že je něco takového možné.
+### Is a declaration like int func(bool b)[]; correct? It is allowed by the grammar but it results in returning an array by value.
 
-Neni to mozne, funkce nesmeji vracet pole (take proto je v C++ std::array). 
+It is not correct, a function must not return an array by value (it is one of the reasons for the existence of `std::array` in C++). It is however impossible to elliminate this case syntactically because it could sneak in via a TYPEIDF.
 
-Funkce `get_array_type`  a  `get_function_type` vraceji `nullptr`, pokud by tim vznikl nelegalni typ. Ten `nullptr` tedy musite otestovat a pripadne ohlasit `errors::INVALID_ARRAY_TYPE`  resp. `errors::INVALID_FUNCTION_TYPE` . 
+In our framework, the functions `get_array_type` and  `get_function_type` return `nullptr` when the requested type would be invalid. It is your responsibility to test the return value and report `errors::INVALID_ARRAY_TYPE` or `errors::INVALID_FUNCTION_TYPE` when `nullptr`. 
 
-Funkce `declare_function` akceptuje `CKTypeObs` a sama si otestuje, jestli to je typ funkce, a pokud ne, tak sama ohlasi chybu (`INVALID_FUNCTION_TYPE`), cimz je osetren pripad `int f {/.../}`.
+On the other hand, the function `declare_function` tests its `CKTypeObs` argument for correctness - if it is not a function type (like in `int f {/.../}`), `declare_function` itself will report an error (`INVALID_FUNCTION_TYPE`).
 
-### Může být návratová hodnota funkce const ? Protože pokud ano, není kam příznak const uložit.
+### Is it possible that the return type of a function is declared const? If so, there is no place to store the flag in the framework.
 
-To `const` u funkce je syntakticky i semanticky povoleno, ale ignoruje se (protoze volani funkce v C neni L-value a nejde tudiz nijak modifikovat jeho hodnotu). Proto framework ten bit ani neuklada.
+The `const` modifier at function return is allowed in both syntax and semantics, it is however ignored (because a function call in C is never an L-value and thus could not be modified anyhow). Therefore, our framework does not store the flag.
 
-### Je povolené definovat struct,  enum  nebo typedef uvnitř parametrů funkce?
+### Is it possible to define a struct, enum or typedef inside function arguments?
 
-Definice `struct`/`enum` mohou byt kdekoliv, syntakticky je to povoleno vsude, semanticky je to v C snad zakazano uvnitr cast a `sizeof` expression, to ale nereste. Naopak, `typedef` v deklaraci parametru byt nesmi (ackoliv gramatika to nejspis povoluje, coz je dusledek archaismu jako `register`, ktere syntakticky jsou ve stejne kategorii jako `typedef`). Ten `typedef` muzete vyresit budto vyhozenim z gramatiky (tj. jako syntax error), nebo semanticky jako `errors::INVALID_SPECIFIERS`.
+The definition of `struct`/`enum` may be placed within any declaration (in C, it is prohibited only inside cast and `sizeof` expressions). 
+
+On the other hand, `typedef` must not appear in a formal argument (although allowed by the grammar od C due to being in the same syntactic category as the archaic `register` keyword). You may solve it either by removing the `typedef` from the grammar rules for the arguments (i.e. producing a syntax error in the malformed case) or by semantic check leading to `errors::INVALID_SPECIFIERS`.
 
 ### What does "CKTypeRefPack" represent?
 
