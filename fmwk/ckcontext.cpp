@@ -44,6 +44,7 @@ namespace cecko {
 		err_def_n INCOMPATIBLE{ "Incompatible operand(s)" };
 		err_def_n INVALID_FUNCTION_TYPE{ "Invalid function type constructed" };
 		err_def_n INVALID_ARRAY_TYPE{ "Invalid array type constructed" };
+		err_def_n INVALID_SPECIFIERS{ "Invalid declaration specifiers" };
 		err_def_n INVALID_VARIABLE_TYPE{ "Invalid variable type" };
 	}
 
