@@ -56,6 +56,8 @@ namespace cecko {
 	public:
 		safe_ptr() : p_(nullptr) {}
 		safe_ptr(std::nullptr_t) : p_(nullptr) {}
+		template<typename E2, typename DF2, std::enable_if_t<std::is_convertible_v<E2*,E*>,bool> = true>
+		safe_ptr(const safe_ptr<E2, DF2>& b) : p_(b.p_) {}
 		explicit safe_ptr(E* p) : p_(p) {}
 		operator E* () const { return p_; }
 		operator bool() const { return !!p_; }
@@ -66,6 +68,8 @@ namespace cecko {
 	private:
 		E* p_;
 		static E& dummy() { static decltype(DF()()) d = DF()(); return d; }
+		template<typename E2, typename DF2>
+		friend class safe_ptr;
 	};
 
 	// numbers
