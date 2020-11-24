@@ -170,17 +170,23 @@ namespace cecko {
 	{
 		return llvm::Function::Create(FT, llvm::Function::ExternalLinkage, name, M);
 	}
-	/// @endcond
 
 	/// Create a new basic block
 	inline CKIRBasicBlockObs CKCreateBasicBlock(const std::string& name, CKIRFunctionObs F)
 	{
+		if (!F)
+			return nullptr;
 		return llvm::BasicBlock::Create(F->getContext(), name, F);
 	}
+	/// @endcond
 
 	/// Get integral constant from a llvm::Value
 	inline CKIRConstantIntObs CKTryGetConstantInt(CKIRValueObs v)
 	{
+		if (!v)
+			return nullptr;
+		if (!llvm::isa< llvm::ConstantInt>(v))
+			return nullptr;
 		return llvm::cast<llvm::ConstantInt>(v);
 	}
 

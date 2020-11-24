@@ -53,6 +53,8 @@ namespace cecko {
 		unsigned int idx = 0;
 		for (auto&& a : items)
 		{
+			if (!a.pack.type)
+				continue;
 			elements_ir.push_back(a.pack.type->get_ir());
 			auto p = elements_.try_emplace(a.name, a.pack, idx, a.loc);
 			elements_ordered_.push_back(p);
@@ -106,7 +108,10 @@ namespace cecko {
 		: ret_type_(ret_type), arg_types_(std::move(arg_types)), variadic_(variadic), irt_(nullptr)
 	{
 		CKIRTypeObsArray arg_ir_types(arg_types_.size());
-		std::transform(arg_types_.begin(), arg_types_.end(), arg_ir_types.begin(), [](auto&& a) { return a->get_ir(); });
+		std::transform(arg_types_.begin(), arg_types_.end(), arg_ir_types.begin(), 
+			[](auto&& a) { 
+				return a->get_ir(); 
+			});
 		irt_ = CKGetFunctionType(ret_type_->get_ir(), std::move(arg_ir_types), variadic_);
 	}
 
@@ -430,10 +435,22 @@ namespace cecko {
 	CKLocalTableObs CKFunction::define(CKAbstractScopeObs parent, CKIRBuilderRef builder, CKFunctionFormalPackArray formal_packs)
 	{
 		assert(!loctab_);
+		assert(type_->get_function_arg_count() == formal_packs.size());
 		loctab_ = std::make_unique<CKLocalTable>(parent);
 		formal_packs_ = std::move(formal_packs);
 		loctab_->varsFromArgs(builder, this, formal_packs_);
 		return &*loctab_;
+	}
+
+	CKTypeSafeObs CKContext::current_function_return_type()
+	{
+		assert(!!loctable_);
+		if (!current_function_)
+			return nullptr;
+		auto ft = current_function_->get_function_type();
+		if (!ft)
+			return nullptr;
+		return ft->get_function_return_type();
 	}
 
 	void CKFunction::dump(CIOStream& os) const
@@ -503,6 +520,8 @@ namespace cecko {
 		globtable_(tab->globtable()),
 		loctable_(nullptr),
 		module_(tab->module()),
+		current_function_(nullptr),
+		current_function_ir_(nullptr),
 		alloca_builder_(tab->module()->getContext()),
 		builder_(tab->module()->getContext()),
 		start_bb_(nullptr),
@@ -574,11 +593,15 @@ namespace cecko {
 
 	void CKContext::define_struct_type_close(CKStructTypeObs type, const CKStructItemArray& items)
 	{
+		if (!type)
+			return;
 		type->finalize(items);
 	}
 
 	void CKContext::define_enum_type_close(CKEnumTypeObs type, CKConstantObsVector items)
 	{
+		if (!type)
+			return;
 		type->finalize(std::move(items));
 	}
 
@@ -630,14 +653,14 @@ namespace cecko {
 	
 	CKFunctionTypeSafeObs CKContext::get_function_type(CKTypeObs ret_type, CKTypeObsArray arg_types, bool variadic) 
 	{ 
-		if (ret_type->is_array() || ret_type->is_function())
+		if (!ret_type || ret_type->is_array() || ret_type->is_function())
 		{
 			// cannot return array/function
 			return nullptr;
 		}
 		for (auto&& a : arg_types)
 		{
-			if (a->is_void() || a->is_array() || a->is_function())
+			if (!a || a->is_void() || a->is_array() || a->is_function())
 			{
 				// cannot pass void/array/function
 				// note: Cecko does not support implicit array/function-to-pointer conversion on argument declarations

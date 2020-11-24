@@ -1111,6 +1111,8 @@ namespace cecko {
 		void enter_block();
 		/// Signalize exiting of a compound statement other than a function definition
 		void exit_block();
+		/// The return type of the current function
+		CKTypeSafeObs current_function_return_type();
 		/// @}
 		
 		/// @name Built-in types
@@ -1204,9 +1206,19 @@ namespace cecko {
 		bool is_typedef(const CIName& n) const;
 		/// @}
 
-		/// @name Representation of integer constants
+		/// @name Direct access to LLVM types
 		/// @{
 		
+		/// LLVM representation of C-types "int64_t" and "uint64_t"
+		CKIRTypeObs get_ir_int64()
+		{
+			return llvm::Type::getInt64Ty(builder_.getContext());
+		}
+		/// @}
+
+		/// @name Representation of integer constants
+		/// @{
+
 		/// LLVM constant of type "char"
 		CKIRConstantIntObs get_int8_constant(std::int_fast32_t v)
 		{
@@ -1220,9 +1232,21 @@ namespace cecko {
 		}
 		/// @}
 
-		/// @name Active code builder
+		/// @name Basic blocks
 		/// @{
 		
+		/// Create a new basic block in the current function
+		CKIRBasicBlockObs create_basic_block(const std::string & name)
+		{
+			if (!current_function_ir_)
+				return nullptr;
+			return CKCreateBasicBlock(name, current_function_ir_);
+		}
+		/// @}
+
+		/// @name Active code builder
+		/// @{
+
 		/// The active builder for the currently open basic block (or inactive)
 		CKIRBuilderObs builder()
 		{
@@ -1256,7 +1280,10 @@ namespace cecko {
 		CKGlobalTableObs globtable_;
 		CKIRModuleObs module_;
 		CKLocalTableObs loctable_;
+		std::unique_ptr<CKLocalTable> dummy_loctable_;
 
+		CKFunctionObs current_function_;
+		CKIRFunctionObs current_function_ir_;
 		CKIRBuilder alloca_builder_;
 		CKIRBuilder builder_;
 		CKIRBasicBlockObs start_bb_;

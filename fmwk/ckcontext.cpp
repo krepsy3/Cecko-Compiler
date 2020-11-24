@@ -155,6 +155,8 @@ namespace cecko {
 
 	CKTypedefConstSafeObs CKContext::define_typedef(const std::string& name, const CKTypeRefPack& type_pack, loc_t loc)
 	{
+		if (!type_pack.type)
+			return nullptr;
 		if (!!conflicting_idf(name))
 		{
 			get_ctx()->message(errors::DUPLICATE_IDF, loc, name);
@@ -170,6 +172,8 @@ namespace cecko {
 	}
 	CKConstantConstSafeObs CKContext::define_constant(const std::string& name, CKIRConstantIntObs value, loc_t loc)
 	{
+		if (!value)
+			return nullptr;
 		if (!!conflicting_idf(name))
 		{
 			get_ctx()->message(errors::DUPLICATE_IDF, loc, name);
@@ -185,6 +189,8 @@ namespace cecko {
 	}
 	void CKContext::define_var(const std::string& name, const CKTypeRefPack& type_pack, loc_t loc)
 	{
+		if (!type_pack.type)
+			return;
 		if (type_pack.type->is_void() || type_pack.type->is_function())
 		{
 			get_ctx()->message(errors::INVALID_VARIABLE_TYPE, loc);
@@ -207,6 +213,9 @@ namespace cecko {
 
 	CKFunctionSafeObs CKContext::declare_function(const CIName& n, CKTypeObs type, loc_t loc)
 	{
+		if (!type)
+			return nullptr;
+
 		if (!type->is_function())
 		{
 			get_ctx()->message(errors::INVALID_FUNCTION_TYPE, loc);
@@ -223,16 +232,28 @@ namespace cecko {
 
 	void CKContext::enter_function(CKFunctionObs f, CKFunctionFormalPackArray pack, loc_t loc)
 	{
-		if (f->is_defined())
+		if (!!f && f->is_defined())
 		{
 			get_ctx()->message(errors::DUPLICATE_FUNCTION_DEFINITION, loc, f->get_name());
 		}
 		assert(!loctable_);
+		current_function_ = f;
+		if (!!f)
+			current_function_ir_ = f->get_function_ir();
+		else
+			current_function_ir_ = CKCreateFunction(CKGetFunctionType(CKGetVoidType(builder_.getContext()), CKIRTypeObsArray(),false), "__dummy", module_);
 		// FUNCTION PROLOG
-		auto BB0 = CKCreateBasicBlock("prolog", f->get_function_ir());
+		auto BB0 = CKCreateBasicBlock("prolog", current_function_ir_);
 		alloca_builder_.SetInsertPoint(BB0);
-		loctable_ = f->define(globtable_, alloca_builder_, std::move(pack));
-		start_bb_ = CKCreateBasicBlock("start", f->get_function_ir());
+		if (!!f)
+			loctable_ = f->define(globtable_, alloca_builder_, std::move(pack));
+		else
+		{
+			if ( ! dummy_loctable_ )
+				dummy_loctable_ = std::make_unique<CKLocalTable>(globtable_);
+			loctable_ = &*dummy_loctable_;
+		}
+		start_bb_ = CKCreateBasicBlock("start", current_function_ir_);
 		builder_.SetInsertPoint(start_bb_);
 	}
 
