@@ -34,9 +34,6 @@ MAKE_TEST("2" "testsxa-stmt")
 MAKE_TEST("2" "testsxa-struct")
 MAKE_TEST("2" "testsxa-typedef")
 
-MAKE_TEST("3" "test1")
-MAKE_TEST("3" "test2typedef")
-
 MAKE_TEST("3" "testdecl-arr")
 MAKE_TEST("3" "testdecl-constptr")
 MAKE_TEST("3" "testdecl-elementary")
