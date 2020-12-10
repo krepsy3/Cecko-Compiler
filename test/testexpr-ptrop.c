@@ -2,7 +2,7 @@
 
 int main(int argc, char** argv)
 {
-	int a, b, f;
+	int a, b;
 
 	a = 3;
 	b = 5;
@@ -19,11 +19,10 @@ int main(int argc, char** argv)
 		pc = pa + b;
 		pd = a + pb;
 		pe = pb - a;
-		f = pb - pa;
 		g = pa[a];
 		ph = &pb[-b];
 
-		printf("*pc=%c *pd=%c *pe=%c f=%d g=%c *ph=%c\n", *pc, *pd, *pe, f, g, *ph);
+		printf("*pc=%c *pd=%c *pe=%c g=%c *ph=%c\n", *pc, *pd, *pe, g, *ph);
 	}
 	{
 		int g;
@@ -42,11 +41,10 @@ int main(int argc, char** argv)
 		pc = pa + b;
 		pd = a + pb;
 		pe = pb - a;
-		f = pb - pa;
 		g = pa[a];
 		pb[-b] = 729;
 
-		printf("*pc=%d *pd=%d *pe=%d f=%d g=%d arr[2]=%d\n", *pc, *pd, *pe, f, g, arr[2]);
+		printf("*pc=%d *pd=%d *pe=%d g=%d arr[2]=%d\n", *pc, *pd, *pe, g, arr[2]);
 	}
 	return 0;
 }

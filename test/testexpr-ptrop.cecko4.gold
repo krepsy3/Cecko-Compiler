@@ -13,7 +13,6 @@ int sscanf_0(const char*,const char*,...);
 int main_3(int argc_3,char**argv_3){
 	int a_5;
 	int b_5;
-	int f_5;
 	{
 		char g_10;
 		const char*p_13;
@@ -25,19 +24,19 @@ int main_3(int argc_3,char**argv_3){
 		const char*ph_11;
 	}
 	{
-		int arr_32[11];
-		int g_29;
-		int*pa_30;
-		int*pb_30;
-		int*pc_30;
-		int*pd_30;
-		int*pe_30;
-		int*ph_30;
+		int arr_31[11];
+		int g_28;
+		int*pa_29;
+		int*pb_29;
+		int*pc_29;
+		int*pd_29;
+		int*pe_29;
+		int*ph_29;
 	}
 }
 ========== starting main() ==========
-*pc=G *pd=K *pe=E f=6 g=E *ph=C
-*pc=666 *pd=1010 *pe=444 f=6 g=444 arr[2]=729
+*pc=G *pd=K *pe=E g=E *ph=C
+*pc=666 *pd=1010 *pe=444 g=444 arr[2]=729
 
 ========== main() returned 0 ==========
 ========== cecko4 done ==========
