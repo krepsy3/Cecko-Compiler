@@ -193,4 +193,18 @@ With respect to the language behavior, the question has no real meaning because 
 
 The pragmatic choice is `_Bool` because the `ICmp` instructions return `i1` which is the LLVM IR representation of Cecko `_Bool`. Choosing `int` would require additional (forth and back) conversion instructions in cases like `_Bool x; x = a < b;`.
 
+### What is the correct sequence of builder calls to create a string literal representation and to cast it to a pointer to char? CreateConstInBoundsGEP2_32 keeps asserting for every type I supplied.
+
+`CreateGlobalString` returns the IR representation of a pointer to a string literal; however, its IR type is `char (*)[N+1]`. The semantics of `CreateConstInBoundsGEP2_32` (with two zeros) is `&p[0][0]`; therefore, it converts the IR type `char (*)[n]` to `char *`. For unknown reasons, the first argument to it shall be the IR type descriptor for `char[n]`, i.e. the type in between the two `[0]` operators.
+
+The two builder calls will be separated in the compiler: The `STRLIT` will produce an L-value expression of the (Cecko) type `const char [N+1]` whose address is the result of `CreateGlobalString`, having the IR type `char (*)[N+1]`. The second step is a more general implicit conversion of the L-value of type `T[n]` to an R-value of type `T*`, which is done by the `CreateConstInBoundsGEP2_32` call. The conversion is a part of the next operation above the `STRLIT` (except of the case of &"ABC", that produces an R-value of (Cecko) type `const char (*)[N+1]`, i.e. the `&` operator does nothing in the IR).
+
+### Is it true that an array can be assigned only an array of the same type and size, and only when passing function arguments?
+
+No, assignment of arrays (when not packed into a struct) the C does not support anywhere. `get_function_type` will refuse to create a function with an argument of an array type (there is a small difference between Cecko and C - in C, the compiler automatically converts all array-typed formal arguments into pointers, e.g. `char *argv[]` is equivalent to `char **argv`).
+If the actual argument is an array, it will always trigger the implicit conversion to a pointer.
+
+### Is it possible to assign structs directly or is is necessary to iterate through every field? 
+
+The IR instructions `Load`, `Store`, `Ret` as well as the arguments of `Call` can copy any IR type including structures (they can even copy arrays, only the rules of C prohibit that). No iteration through fields in your part of compiler is required (and there is no support for it in the framework).
 
