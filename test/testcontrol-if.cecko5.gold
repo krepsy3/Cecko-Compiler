@@ -1,0 +1,41 @@
+========== tables ==========
+// --- GLOBAL TYPEDEFS ---
+typedef struct _file_s_0 FILE_0;
+// --- FUNCTION DECLARATIONS ---
+void f_3(_Bool,_Bool,_Bool);
+int main_34(int,char**);
+void*memset_0(void*,int,int);
+int printf_0(const char*,...);
+int scanf_0(const char*,...);
+int sprintf_0(char*,const char*,...);
+int sscanf_0(const char*,const char*,...);
+// --- GLOBAL VARIABLES ---
+// --- FUNCTION DEFINITIONS ---
+void f_3(_Bool a_3,_Bool b_3,_Bool c_3){
+	{
+	}
+	{
+		{
+		}
+	}
+	{
+		{
+		}
+		{
+		}
+	}
+}
+int main_34(int argc_34,char**argv_34){
+}
+========== starting main() ==========
+b is false c is also false 
+b is false c is true 
+b is true 
+b is true c is also true 
+a is true b is false c is also false 
+a is true b is false c is true 
+a is true b is true 
+a is true b is true c is also true 
+
+========== main() returned 0 ==========
+========== cecko5 done ==========

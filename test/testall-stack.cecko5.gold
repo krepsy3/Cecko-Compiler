@@ -1,0 +1,65 @@
+========== tables ==========
+// --- GLOBAL TYPEDEFS ---
+struct Str_5{
+	const char*key_6;
+	struct Str_5*next_7;
+};
+typedef struct _file_s_0 FILE_0;
+typedef struct Str_5*str_ptr_3;
+// --- FUNCTION DECLARATIONS ---
+void argreverttest_48(int,const char*const*);
+_Bool empty_32(struct Str_5**);
+const char*front_37(struct Str_5**);
+struct Str_5*get_str_15();
+int main_71(int,char**);
+void*memset_0(void*,int,int);
+void pop_front_42(struct Str_5**);
+int printf_0(const char*,...);
+void push_front_23(struct Str_5**,const char*);
+int scanf_0(const char*,...);
+int sprintf_0(char*,const char*,...);
+int sscanf_0(const char*,const char*,...);
+// --- GLOBAL VARIABLES ---
+struct Str_5 array_12[1000];
+int array_end_13;
+struct Str_5*root_10;
+// --- FUNCTION DEFINITIONS ---
+void argreverttest_48(int argc_48,const char*const*argv_48){
+	int i_51;
+	const char*z_50;
+	{
+	}
+	{
+	}
+}
+_Bool empty_32(struct Str_5**rootp_32){
+}
+const char*front_37(struct Str_5**rootp_37){
+}
+struct Str_5*get_str_15(void){
+	struct Str_5*p_17;
+}
+int main_71(int argc_71,char**argv_71){
+	const char*n_argv_73[5];
+}
+void pop_front_42(struct Str_5**rootp_42){
+}
+void push_front_23(struct Str_5**rootp_23,const char*key_23){
+	struct Str_5*p_25;
+}
+========== starting main() ==========
+... argreverttest ...
+sizeof(struct Str) = 16
+argv[0] is "Zero"
+argv[1] is "One"
+argv[2] is "Two"
+argv[3] is "Three"
+argv[4] is "Four"
+popped "Four"
+popped "Three"
+popped "Two"
+popped "One"
+popped "Zero"
+
+========== main() returned 0 ==========
+========== cecko5 done ==========

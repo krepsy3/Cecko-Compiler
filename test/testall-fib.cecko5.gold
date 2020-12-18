@@ -1,0 +1,31 @@
+========== tables ==========
+// --- GLOBAL TYPEDEFS ---
+typedef struct _file_s_0 FILE_0;
+// --- FUNCTION DECLARATIONS ---
+int fib_3(int);
+void fibtest_15();
+int main_25(int,char**);
+void*memset_0(void*,int,int);
+int printf_0(const char*,...);
+int scanf_0(const char*,...);
+int sprintf_0(char*,const char*,...);
+int sscanf_0(const char*,const char*,...);
+// --- GLOBAL VARIABLES ---
+// --- FUNCTION DEFINITIONS ---
+int fib_3(int x_3){
+	int s_5;
+	{
+	}
+}
+void fibtest_15(void){
+	int n_17;
+	int s_18;
+}
+int main_25(int argc_25,char**argv_25){
+}
+========== starting main() ==========
+... fibtest ...
+fib(20) returned 6765
+
+========== main() returned 0 ==========
+========== cecko5 done ==========
