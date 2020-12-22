@@ -11,7 +11,7 @@ int main(int argc, char** argv)
 {
 	{
 		int i;
-		char * px, * py, * pz;
+		const char * px, * py, * pz;
 		_Bool a, b, c, d, e, f;
 		int g;
 

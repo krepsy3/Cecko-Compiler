@@ -1,4 +1,3 @@
-Error (line 18): Incompatible operand(s)
 ========== tables ==========
 // --- GLOBAL TYPEDEFS ---
 typedef struct _file_s_0 FILE_0;
@@ -25,9 +24,9 @@ int main_10(int argc_10,char**argv_10){
 		_Bool f_15;
 		int g_16;
 		int i_13;
-		char*px_14;
-		char*py_14;
-		char*pz_14;
+		const char*px_14;
+		const char*py_14;
+		const char*pz_14;
 	}
 }
 ========== starting main() ==========
