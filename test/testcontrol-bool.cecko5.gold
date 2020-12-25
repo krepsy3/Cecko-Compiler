@@ -1,0 +1,38 @@
+========== tables ==========
+// --- GLOBAL TYPEDEFS ---
+typedef struct _file_s_0 FILE_0;
+// --- FUNCTION DECLARATIONS ---
+int btoi_3(_Bool);
+_Bool itob_8(int);
+int main_15(int,char**);
+void*memset_0(void*,int,int);
+int printf_0(const char*,...);
+int scanf_0(const char*,...);
+int sprintf_0(char*,const char*,...);
+int sscanf_0(const char*,const char*,...);
+// --- GLOBAL VARIABLES ---
+char*px_13;
+// --- FUNCTION DEFINITIONS ---
+int btoi_3(_Bool p_3){
+}
+_Bool itob_8(int p_8){
+}
+int main_15(int argc_15,char**argv_15){
+	{
+		_Bool a_20;
+		_Bool b_20;
+		_Bool c_20;
+		_Bool d_20;
+		_Bool e_20;
+		_Bool f_20;
+		_Bool g_20;
+		_Bool h_20;
+		int i_18;
+		char x_19;
+	}
+}
+========== starting main() ==========
+a=1 b=0 c=1 d=0 e=0 f=1 g=1 h=0
+
+========== main() returned 0 ==========
+========== cecko5 done ==========

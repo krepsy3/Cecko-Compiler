@@ -1,0 +1,30 @@
+========== tables ==========
+// --- GLOBAL TYPEDEFS ---
+typedef struct _file_s_0 FILE_0;
+// --- FUNCTION DECLARATIONS ---
+int main_26(int,char**);
+void*memset_0(void*,int,int);
+void pointerarithmeticstest_3();
+int printf_0(const char*,...);
+int scanf_0(const char*,...);
+int sprintf_0(char*,const char*,...);
+int sscanf_0(const char*,const char*,...);
+// --- GLOBAL VARIABLES ---
+// --- FUNCTION DEFINITIONS ---
+int main_26(int argc_26,char**argv_26){
+}
+void pointerarithmeticstest_3(void){
+	char arr_5[27];
+	char ch_8;
+	char*e_7;
+	char*p_6;
+	{
+		int locvar_15;
+	}
+}
+========== starting main() ==========
+... pointerarithmeticstest ...
+ABCDEFGHIJKLMNOPQRSTUVWXYZ
+
+========== main() returned 0 ==========
+========== cecko5 done ==========
