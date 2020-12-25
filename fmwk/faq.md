@@ -208,3 +208,12 @@ If the actual argument is an array, it will always trigger the implicit conversi
 
 The IR instructions `Load`, `Store`, `Ret` as well as the arguments of `Call` can copy any IR type including structures (they can even copy arrays, only the rules of C prohibit that). No iteration through fields in your part of compiler is required (and there is no support for it in the framework).
 
+### How to pass the additional arguments to a variadic function?
+
+Variadic arguments in C have special rules:
+- every integer type converted to (at least) int
+- every FP type converted to at least double
+- arrays are converted to pointers as usual
+Inside `printf`, the consequences are, e.g., that `%c` means "expect int argument".
+
+In Cecko, it simply means converting `_Bool` and `char` to `int` (by `ZExt`) and arrays to pointers (by `CreateConstInBoundsGEP2_32`).
