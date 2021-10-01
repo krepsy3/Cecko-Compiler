@@ -1,5 +1,4 @@
-/build
-/build.msvc
+/build*
 /test/x64
 /test/test1.obj
 /test/test1.s

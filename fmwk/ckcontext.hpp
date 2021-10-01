@@ -33,7 +33,7 @@ namespace cecko {
 		protected:
 			template< typename ... AT>
 			err_object_base(const char* name, AT && ... at)
-				: name(name), err_string_array<N>{std::forward<AT>(at) ...}
+				: err_string_array<N>{std::forward<AT>(at) ...}, name(name)
 			{}
 		};
 		/// @endcond 
