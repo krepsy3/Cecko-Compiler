@@ -36,7 +36,7 @@ extern "C" {
 		}
 		else
 		{
-			auto rsize = rv2 + 1;	// ending zero
+			auto rsize = (std::size_t)rv2 + 1;	// ending zero
 			if (rsize >= buffer.size())
 				buffer.resize(rsize);
 			auto rv = std::vsnprintf(buffer.data(), buffer.size(), s, va);

@@ -496,10 +496,10 @@ namespace cecko {
 
 	CKTables::CKTables(CKIREnvironmentObs irenv)
 		: irenv_(irenv),
-		typetable_(irenv->context()),
-		globtable_(),
 		module_(irenv->module()),
-		data_layout_(irenv->data_layout())
+		data_layout_(irenv->data_layout()),
+		typetable_(irenv->context()),
+		globtable_()
 	{
 		declare_library();
 	}
@@ -523,8 +523,8 @@ namespace cecko {
 	CKContext::CKContext(CKTablesObs tab)
 		: typetable_(tab->typetable()),
 		globtable_(tab->globtable()),
-		loctable_(nullptr),
 		module_(tab->module()),
+		loctable_(nullptr),
 		current_function_(nullptr),
 		current_function_ir_(nullptr),
 		alloca_builder_(tab->module()->getContext()),
@@ -681,7 +681,7 @@ namespace cecko {
 		auto t_char = typetable_.get_char_type();
 		auto t_int = typetable_.get_int_type();
 		auto t_ptr_void = typetable_.get_pointer_type({ t_void, false });
-		auto t_cptr_void = typetable_.get_pointer_type({ t_void, true });
+		//auto t_cptr_void = typetable_.get_pointer_type({ t_void, true });
 		auto t_ptr_char = typetable_.get_pointer_type({ t_char, false });
 		auto t_cptr_char = typetable_.get_pointer_type({ t_char, true });
 

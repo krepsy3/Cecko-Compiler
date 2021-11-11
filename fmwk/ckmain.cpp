@@ -17,7 +17,7 @@ namespace cecko {
 				++aix;
 				return val;
 			}
-			if (aix + 1 < argc)
+			if (aix + 1 < (std::size_t)argc)
 			{
 				auto val = std::string(argv[aix + 1]);
 				aix += 2;
@@ -26,7 +26,7 @@ namespace cecko {
 			return std::string();
 		};
 
-		while (aix < argc && (apos > 0 || argv[aix][0] == '-'))
+		while (aix < (std::size_t)argc && (apos > 0 || argv[aix][0] == '-'))
 		{
 			// skip '-' if necessary
 			if (apos == 0 && argv[aix][0] == '-')
@@ -49,7 +49,7 @@ namespace cecko {
 			}
 		}
 
-		if (aix >= argc)
+		if (aix >= (std::size_t)argc)
 		{
 			std::cout << "cecko <input file>" << std::endl;
 			return false;
