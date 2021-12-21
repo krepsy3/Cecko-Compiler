@@ -13,7 +13,7 @@ int main(int argc, char** argv)
 	// the next one is bad as well
 	char g = '\
 	char h = '\xF';		// this should be fine
-
+	return 0;
 }
 
 char z = 'a

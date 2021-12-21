@@ -10,6 +10,7 @@ ti main(ti argc, tx** argv)
 {
 	typedef ti t2;
 	t2 v2;
+	return 0;
 }
 
 typedef tx t2;

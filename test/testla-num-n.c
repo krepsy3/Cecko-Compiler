@@ -9,4 +9,6 @@ int main(int argc, char** argv)
 
 	int e = 12345678901234567890abc;	// malformed and long
 	int f = 0x0123456789abcdefghijkl;	// malformed and long
+
+	return 0;
 }

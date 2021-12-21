@@ -10,6 +10,7 @@ int main(int argc, char** argv)
 	// the next one is bad
 	char *q = "\
 
+	return 0;
 }
 
 char *z = "EOF in string
