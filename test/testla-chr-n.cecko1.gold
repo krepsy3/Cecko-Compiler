@@ -56,6 +56,9 @@ Error (line 14): End of line in string or character literal
 15: =
 15: integer literal 15
 15: ;
+16: return
+16: integer literal 0
+16: ;
 17: }
 19: ETYPE char
 19: identifier [z]

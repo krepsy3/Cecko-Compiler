@@ -1,7 +1,7 @@
 ========== tables ==========
 // --- GLOBAL TYPEDEFS ---
 typedef struct _file_s_0 FILE_0;
-typedef char t2_15;
+typedef char t2_16;
 typedef int ti_3;
 typedef char tx_4;
 // --- FUNCTION DECLARATIONS ---
@@ -12,7 +12,7 @@ int scanf_0(const char*,...);
 int sprintf_0(char*,const char*,...);
 int sscanf_0(const char*,const char*,...);
 // --- GLOBAL VARIABLES ---
-char v2_16;
+char v2_17;
 int vi_6;
 char vx_7;
 // --- FUNCTION DEFINITIONS ---

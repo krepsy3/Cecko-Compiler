@@ -10,6 +10,9 @@
 6: identifier [argv]
 6: )
 7: {
-10: }
-Error (line 12): End of comment outside comment
+10: return
+10: integer literal 0
+10: ;
+11: }
+Error (line 13): End of comment outside comment
 ========== cecko1 done ==========

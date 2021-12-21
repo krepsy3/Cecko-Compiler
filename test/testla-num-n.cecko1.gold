@@ -48,5 +48,8 @@ Error (line 11): Malformed integer literal "0x0123456789abcdefghijkl"
 Error (line 11): Integer literal "0x0123456789abcdefghijkl" out of range
 11: integer literal -1985229329
 11: ;
-12: }
+13: return
+13: integer literal 0
+13: ;
+14: }
 ========== cecko1 done ==========

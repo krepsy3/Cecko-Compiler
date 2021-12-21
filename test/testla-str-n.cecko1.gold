@@ -43,11 +43,14 @@ Error (line 8): Malformed escape sequence "\u"
 Error (line 11): Malformed escape sequence "\"
 Error (line 11): End of line in string or character literal
 11: string literal ""
-13: }
-15: ETYPE char
-15: *
-15: identifier [z]
-15: =
-Error (line 15): End of file in string or character literal
-15: string literal "EOF in string"
+13: return
+13: integer literal 0
+13: ;
+14: }
+16: ETYPE char
+16: *
+16: identifier [z]
+16: =
+Error (line 16): End of file in string or character literal
+16: string literal "EOF in string"
 ========== cecko1 done ==========
