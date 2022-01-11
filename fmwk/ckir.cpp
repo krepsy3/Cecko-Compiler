@@ -163,8 +163,11 @@ namespace cecko {
 				return 1;
 			}
 
-			if (verifyModule(*ckirmoduleobs_)) {
-				os << "========== Error constructing function ==========\n";
+			std::string errors;
+			llvm::raw_string_ostream errors_ostream(errors);
+			bool dummy;
+			if (verifyModule(*ckirmoduleobs_, &errors_ostream, &dummy)) {
+				os << "========== Error constructing function ==========\n" << errors;
 				return 1;
 			}
 
