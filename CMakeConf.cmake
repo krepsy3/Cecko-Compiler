@@ -18,7 +18,9 @@ else()
 	message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
 	include_directories(${LLVM_INCLUDE_DIRS})
-	add_definitions(${LLVM_DEFINITIONS})
+	# add_definitions(${LLVM_DEFINITIONS})
+	separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
+	add_definitions(${LLVM_DEFINITIONS_LIST})
 
 	llvm_map_components_to_libnames(LLVM_LIBS_USED core mcjit nativecodegen)	# executionengine interpreter mc support x86codegen
 endif()
@@ -56,7 +58,7 @@ function(SET_TARGET_LINK_OPTIONS TARGET OPT_GCC OPT_MSVC)
 endfunction()
 
 function(COMMON_OPTIONS TARGET)
-	set_property(TARGET ${TARGET} PROPERTY CXX_STANDARD 17)
+	set_property(TARGET ${TARGET} PROPERTY CXX_STANDARD 20)
 	if(NOT DEFINED LLVM_PACKAGE_VERSION)
 		target_include_directories(${TARGET} PUBLIC "${LLVM_OBJ_ROOT}/include")
 	else()
