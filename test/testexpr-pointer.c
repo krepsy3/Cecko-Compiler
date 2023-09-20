@@ -27,16 +27,16 @@ int main(int argc, char** argv)
 		j = *pgb;
 		k = *pgx;
 		l = *pgi;
-
+		
 		*pgx = 'L';
 		*pgi = 123;
-
+		
 		m = gx;
 		n = gi;
-
+		
 		printf("j=%d k=%d l=%d m='%c' n=%d\n", j, k, l, m, n);
 	}
-
+	
 	{
 		int k, l, m, n;
 
@@ -54,7 +54,7 @@ int main(int argc, char** argv)
 
 	gpi = pgi;
 	pgpi = &gpi;
-
+	
 	{
 		int j, k, l, m;
 

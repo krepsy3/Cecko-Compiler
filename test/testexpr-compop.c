@@ -31,7 +31,7 @@ int main(int argc, char** argv)
 	}
 	{
 		char ai, bi, ci, di, ei, fi, gi, hi, ii;
-
+	
 		ai = 255;
 		bi = 255;
 		ci = 0;
@@ -41,7 +41,7 @@ int main(int argc, char** argv)
 		gi = 200;
 		hi = 200;
 		ii = 200;
-
+		
 		ar = ++ai;
 		br = bi++;
 		cr = --ci;
@@ -68,16 +68,18 @@ int main(int argc, char** argv)
 		di = d + 4;
 		ei = d + 4;
 		fi = d + 4;
-
+		
 		ar = ++ai;
 		br = bi++;
 		cr = --ci;
 		dr = di--;
 		er = ei += 5;
 		fr = fi -= 4;
-
+		
+		
 		printf("*ai=%c *bi=%c *ci=%c *di=%c *ei=%c *fi=%c\n", *ai, *bi, *ci, *di, *ei, *fi);
 		printf("*ar=%c *br=%c *cr=%c *dr=%c *er=%c *fr=%c\n", *ar, *br, *cr, *dr, *er, *fr);
+		
 	}
 	return 0;
 }

@@ -12,6 +12,7 @@
 #include <vector>
 #include <string>
 #define MULTICHAR_MAX 4
+#define HEXPREF_LEN 2
 }
 /* NEVER SET %option outfile INTERNALLY - SHALL BE SET BY CMAKE */
 
@@ -56,8 +57,8 @@ int multi_comment_depth = 0;
 					ctx->incline();
 					BEGIN(INITIAL);
 				}
-	<<EOF>>		return cecko::parser::make_EOF(ctx->line());
 	.	/* bez akce */
+	<<EOF>>		return cecko::parser::make_EOF(ctx->line());
 }
 
 "/*"	{
@@ -74,11 +75,11 @@ int multi_comment_depth = 0;
 						BEGIN(INITIAL);
 				}
 	{NEWLINE}	ctx->incline();
+	.			/* bez akce */
 	<<EOF>>		{
 					ctx->message(cecko::errors::EOFINCMT, ctx->line());
 					return cecko::parser::make_EOF(ctx->line());
 				}
-	.			/* bez akce */
 }
 
 	/* string and char */
@@ -256,10 +257,10 @@ int multi_comment_depth = 0;
 
 	/* integers */
 {HEXPREF}{HEXDIGIT}+	{
-							if (casem::number_literal_outrange(yytext + 2, yyleng - 2, true)) {
+							if (casem::number_literal_outrange(yytext + HEXPREF_LEN, yyleng - HEXPREF_LEN, true)) {
 								ctx->message(cecko::errors::INTOUTRANGE, ctx->line(), yytext);
 							}
-							return cecko::parser::make_INTLIT(casem::parse_number_literal(yytext + 2, yyleng - 2, true), ctx->line());
+							return cecko::parser::make_INTLIT(casem::parse_number_literal(yytext + HEXPREF_LEN, yyleng - HEXPREF_LEN, true), ctx->line());
 						}
 {DIGIT}+	{
 				if (casem::number_literal_outrange(yytext, yyleng, false)) {
@@ -269,47 +270,44 @@ int multi_comment_depth = 0;
 			}
 
 {HEXPREF}{HEXDIGIT}+{NONHEXDIGIT}{IDCHAR}*	{
-												char* numtext = yytext + 2;
-												int numleng = 0;
-												while(casem::is_numeral_char(numtext[numleng], true)) {
-													numleng++;
+												char* numtext = yytext + HEXPREF_LEN;
+												int numlen = 0;
+												while(casem::is_numeral_char(numtext[numlen], true)) {
+													numlen++;
 												}
 												
 												ctx->message(cecko::errors::BADINT, ctx->line(), yytext);
 
-												if (casem::number_literal_outrange(numtext, numleng, true)) {
+												if (casem::number_literal_outrange(numtext, numlen, true)) {
 													ctx->message(cecko::errors::INTOUTRANGE, ctx->line(), yytext);
 												}
 
-												int result = casem::parse_number_literal(numtext, numleng, true);
+												int result = casem::parse_number_literal(numtext, numlen, true);
 												return cecko::parser::make_INTLIT(result, ctx->line());
 											}
 
 {DIGIT}+{NONDIGIT}{IDCHAR}*	{
-								int numleng = 0;
-								while(casem::is_numeral_char(yytext[numleng], false)) {
-									numleng++;
+								int numlen = 0;
+								while(casem::is_numeral_char(yytext[numlen], false)) {
+									numlen++;
 								}
 								
 								ctx->message(cecko::errors::BADINT, ctx->line(), yytext);
 
-								if (casem::number_literal_outrange(yytext, numleng, false)) {
+								if (casem::number_literal_outrange(yytext, numlen, false)) {
 									ctx->message(cecko::errors::INTOUTRANGE, ctx->line(), yytext);
 								}
 
-								int result = casem::parse_number_literal(yytext, numleng, false);
+								int result = casem::parse_number_literal(yytext, numlen, false);
 								return cecko::parser::make_INTLIT(result, ctx->line());
 							}
 
 	/* keywords */
-break			return cecko::parser::make_BREAK(ctx->line());
 const			return cecko::parser::make_CONST(ctx->line());
-continue		return cecko::parser::make_CONTINUE(ctx->line());
 do				return cecko::parser::make_DO(ctx->line());
 else			return cecko::parser::make_ELSE(ctx->line());
 enum			return cecko::parser::make_ENUM(ctx->line());
 for				return cecko::parser::make_FOR(ctx->line());
-goto			return cecko::parser::make_GOTO(ctx->line());
 if				return cecko::parser::make_IF(ctx->line());
 return			return cecko::parser::make_RETURN(ctx->line());
 sizeof			return cecko::parser::make_SIZEOF(ctx->line());
@@ -352,7 +350,6 @@ _Bool			return cecko::parser::make_ETYPE(cecko::gt_etype::BOOL, ctx->line());
 "||"			return cecko::parser::make_DVERT(ctx->line());
 
 ";"				return cecko::parser::make_SEMIC(ctx->line());
-":"				return cecko::parser::make_COLON(ctx->line());
 ","				return cecko::parser::make_COMMA(ctx->line());
 
 "="				return cecko::parser::make_ASGN(ctx->line());
@@ -374,7 +371,7 @@ _Bool			return cecko::parser::make_ETYPE(cecko::gt_etype::BOOL, ctx->line());
 
 .			ctx->message(cecko::errors::UNCHAR, ctx->line(), yytext);
 
-<INITIAL,COMMENT><<EOF>>	return cecko::parser::make_EOF(ctx->line());
+<INITIAL><<EOF>>	return cecko::parser::make_EOF(ctx->line());
 
 %%
 
